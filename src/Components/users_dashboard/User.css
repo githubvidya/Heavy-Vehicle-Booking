@@ -1,0 +1,427 @@
+
+
+.landingPage {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    background: #f7faff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+      color: #333;
+}
+
+.leftContent {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    font-family: 'Poppins', sans-serif;
+
+}
+
+.Search {
+    width: 80%;
+    height: 70%;
+    position: absolute;
+    right: 0%;
+    bottom: 3%;
+font-size: 64px;         
+  line-height: 1;         
+    letter-spacing: -1px;
+}
+
+.headingSearch {
+    display: flex;
+    flex-direction: column;
+}
+
+.No1 {
+    font-size: clamp(50px, 3.5vw, 55px);
+    font-weight: 600;
+
+}
+
+.App {
+    font-size: clamp(32px, 3.5vw, 55px);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.Booking {
+    font-size: clamp(20px, 2rem, 20px);
+    font-weight: 300;
+
+}
+
+.input{
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+}
+.input .select {
+    width: 350px;
+    height: 50px;
+    margin-top: 4%;
+    padding: 0 15px;
+
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23333' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5 7l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+.input .select:hover {
+    border-color: #f4a825;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.input .select:focus {
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255,152,0,0.2);
+}
+
+.input .select:focus {
+    border-color: #ff9800;
+    box-shadow: 0 0 10px rgba(255,152,0,0.4);
+}
+
+.subbmitDistrict {
+    width: 350px;
+    height: 50px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff9800, #ffb74d);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.subbmitDistrict:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+.subbmitDistrict:active {
+    transform: scale(0.97);
+}
+
+
+.rightContent {
+    width: 50%;
+    height: auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.rightContent .imageJCB {
+    width: 100%;
+    height: auto;
+}
+
+.imageJCB img {
+    width: 100%;
+    height: auto;
+    max-width: 550px;   
+    object-fit: cover;
+    position: static;   
+    /* border: 2px solid red; */
+}
+
+
+
+
+
+/* ______________________________________________________SERVICES_______________________________________________________________ */
+.ServicesInS {
+  text-align: center;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* HEADING */
+.headindS {
+  width: 90%;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.headindS h1 {
+  text-align: left;
+  margin-left: 5%;
+}
+
+.headindS span {
+  position: absolute;
+  width: 100px;
+  height: 3px;
+  background: #ff9800;
+  bottom: -5px;
+  left: 5%;
+}
+
+.ServicesBoxes {
+  width: 90%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 50px;
+}
+
+.serviceBox {
+  background: #f7faff;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  text-align: left;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: 0.3s;
+  cursor: pointer;
+  gap: 10px;
+}
+
+.serviceBox:hover {
+  transform: translateY(-8px);
+}
+
+.allItems {
+  margin-right: 10px;
+   color: #333;
+}
+
+.h3inItems {
+  font-size: clamp(18px, 1.2rem, 22px);
+}
+
+.serviceBox p {
+  margin-top: 7px;
+  font-size: clamp(12px, 0.95rem, 16px);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 1024px) {
+  .Search {
+    width: 90%;
+  }
+
+  .input {
+    width: 100%;
+  }
+
+  .input .select,
+  .subbmitDistrict {
+    width: 100%;
+  }
+     .ServicesBoxes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* =========================
+   MOBILE (below 768px)
+========================= */
+@media (max-width: 768px) {
+
+  .landingPage {
+    flex-direction: column;
+    height: auto;
+    padding: 20px 10px;
+           margin-top: 5%;
+  }
+
+  .leftContent,
+  .rightContent {
+    width: 100%;
+    height: auto;
+  }
+
+  .Search {
+    position: relative;
+    width: 100%;
+    height: auto;
+    right: 0;
+    bottom: 0;
+    line-height: 0.7;
+    /* border: 2px solid red; */
+  }
+.headingSearch{
+  padding: 4%;
+}
+.headindS{
+  margin-bottom: 20px;
+}
+.all{
+  width: 100%;
+  padding-left: 5.5%;
+  /* border: 1px solid red; */
+}
+
+.App{
+    margin-bottom: 0%;
+}
+  .input {
+    width: 100%;
+    align-items: center;
+    gap: 0px;
+  }
+
+  .input .select {
+    width: 90%;
+  }
+
+  .subbmitDistrict {
+    width: 90%;
+  }
+
+  .rightContent {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .imageJCB img {
+        max-width: 100%;
+    }
+  .ServicesBoxes {
+    grid-template-columns: 1fr;
+     gap: 15px;
+  }
+
+  .serviceBox {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .allItems {
+    margin: 10px 0 0 0;
+  }
+
+  .icon {
+    margin: 0;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+.h3inItems{
+  font-size: 1rem;
+}
+
+  .No1,
+  .App {
+    font-size: 28px;
+  }
+
+  .Booking {
+    font-size: 14px;
+  }
+
+  .input .select,
+  .subbmitDistrict {
+    height: 45px;
+    font-size: 14px;
+  }
+  .ServicesInS {
+    padding: 20px 10px;
+  }
+
+  .headindS h1 {
+    font-size: 22px;
+  }
+.serviceBox {
+  padding: 10px;
+  /* margin-top: 3px; */
+}
+.serviceBox p{
+  margin-top: 4px;
+}
+ .imageJCB img {
+        width: 100%;
+        height: auto;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.EarnInUser{
+  width: 100%;
+  height: fit-content;
+  background: white;
+  margin-top: 3%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+
+.testimoniall{
+   width: 100%;
+  height: fit-content;
+  background: white;
+  margin-top: 3%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.whyChooseUS{
+    width: 100%;
+  height: fit-content;
+  background: white;
+  margin-top: 3%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+

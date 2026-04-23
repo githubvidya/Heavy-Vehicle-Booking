@@ -1,0 +1,175 @@
+/* 🔥 MAIN CONTAINER */
+.searchContainer {
+  width: 100%;
+  min-height: 100vh;
+ padding: 80px 30px 10px 30px;
+  text-align: center;
+}
+
+/* 🔥 CARD WRAPPER (CENTERED LAYOUT) */
+.searchGrid {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+.searchCard {
+  width: 300px; 
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  transition: 0.3s ease;
+}
+
+.searchCard:hover {
+  transform: translateY(-6px);
+}
+
+.fullImageView {
+  max-width: 60%;
+  max-height: 60%;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+/* Make image clickable */
+.vehicleImg {
+  width: 100%;
+  height: 300px;       
+  max-height: 250px;  
+  object-fit: contain;
+  background: #f5f5f5; 
+  cursor: pointer;
+}
+
+/* 🔥 CONTENT */
+.cardContent {
+  padding: 15px;
+  text-align: left;
+}
+
+.cardContent h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* 🔥 TEXT STYLE */
+.cardContent p {
+  font-size: 14px;
+  margin: 5px 0;
+  color: #555;
+}
+
+/* 🔥 BUTTON */
+.cardContent button {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ff9800, #ffb74d);
+  transition: 0.3s;
+}
+
+.cardContent button:hover {
+  transform: scale(1.03);
+  opacity: 0.95;
+}
+
+/* 🔥 MODAL */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* 🔥 MODAL BOX */
+.modalBox {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.3s ease;
+}
+
+/* 🔥 INPUTS */
+.modalBox input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.modalBox input:focus {
+  border-color: #ff9800;
+}
+
+/* 🔥 BUTTON GROUP */
+.modalButtons {
+  display: flex;
+  gap: 10px;
+}
+
+/* CONFIRM */
+.modalButtons button:first-child {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff9800, #ffb74d);
+}
+
+/* CANCEL */
+.modalButtons button:last-child {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #ddd;
+  cursor: pointer;
+}
+
+/* 🔥 RESPONSIVE */
+@media (max-width: 768px) {
+  .searchCard {
+    width: 90%;
+  }
+
+  .cardContent {
+    text-align: center;
+  }
+}
+
+/* 🔥 ANIMATION */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

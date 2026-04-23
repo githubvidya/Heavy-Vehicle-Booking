@@ -1,0 +1,360 @@
+.optinal {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+}
+
+.sideImage {
+    width: 65%;
+    height: 100vh;
+}
+
+.logo_main {
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5%;
+}
+
+.logo {
+    width: 100%;
+    height: 100px;
+}
+
+.logo_name {
+    font-size: clamp(15px, 2.5vw, 25px);
+    letter-spacing: 1.5px;
+    background: linear-gradient(to right, rgb(44, 114, 234), rgb(183, 64, 108), rgb(239, 105, 21));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.navbar .h6 {
+    font-size: clamp(15px, 2vw, 20px);
+}
+
+.aside_ {
+    width: 600px;
+    max-width: 100%;
+    height: 95vh;
+    max-height: 100%;
+    border: 1px solid gray;
+    border-bottom: none;
+    padding: 10px 20px 10px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+}
+
+.navbar {
+    width: 100%;
+    height: 60px;
+    border: 1px solid gainsboro;
+    position: relative;
+    border-radius: 10px;
+    margin-bottom: 2%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar span {
+    color: rgba(56, 57, 57, 0.784);
+    cursor: pointer;
+    padding: 10px;
+}
+
+.aside_ p {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(15px, 2.5vw, 20px);
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+    color: #4d4c4c;
+    text-align: center;
+}
+
+
+.profile_btn_pic {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+}
+
+.profile_btn_pic:hover {
+    transform: scale(1.08);
+}
+
+.owner_customers {
+    width: 90%;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    border-radius: 12px;
+    margin-top: 7%;
+    margin-bottom: 3%;
+    gap: 18px;
+
+    /* Modern glass effect */
+    background: rgba(255, 255, 255, 0.08);
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.owner_customers:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+}
+
+.owner_customers .login_to_contine {
+    color: #ff4d4d;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+
+.owner_customers .btn {
+    width: 260px;
+    height: 42px;
+
+    background: linear-gradient(
+        135deg,
+        #3e7ce7,
+        #cb4375,
+        #ef6915
+    );
+
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+
+    border: none;
+    border-radius: 8px;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+
+    transition: all 0.3s ease;
+}
+
+
+.owner_customers .btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.owner_customers .btn:active {
+    transform: scale(0.97);
+}
+.profile_btn {
+    background: transparent;
+    border: transparent;
+    cursor: pointer;
+    margin-right: 10px;
+    float: right;
+    z-index: 999;
+}
+
+.Login_btn {
+    margin: 5px;
+    padding: 5px 15px 5px 15px;
+    background: linear-gradient(
+        90deg,
+        rgba(62, 124, 231, 0.718),
+        rgba(203, 67, 117, 0.624),
+        rgba(239, 105, 21, 0.571)
+    );
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.login_handle {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.login_handle p {
+    font-size: clamp(17px, 2.5vw, 14px);
+     color: white;
+}
+
+.login_handle button {
+    width: 170px;
+    max-width: 40%;
+    height: 40px;
+    border-radius: 10px;
+    border: transparent;
+}
+
+.open_profile {
+    width: 70%;
+    height: 100vh;
+    float: right;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 0%;
+    top: 0%;
+    background: #656464;
+    z-index: 99;
+    border-top-right-radius: 10px;
+}
+
+.open_btn {
+    margin-top: 9px;
+    margin-right: 9px;
+    color: antiquewhite;
+    position: absolute;
+    right: 0%;
+}
+
+.content_openbox {
+    width: 100%;
+    height: 100%;
+}
+
+.allditels {
+    width: 100%;
+    position: relative;
+    top: 20%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: clamp(18px, 2vw, 16px);
+}
+
+.navbar .span_p {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgb(220, 222, 222);
+    gap: 8px;
+    font-size: clamp(18px, 2vw, 19px);
+}
+
+.allditels .image_in_id {
+    width: 100px;
+    max-width: 80px;
+    height: 100px;
+    max-height: 80px;
+    border-radius: 100%;
+}
+
+.pre {
+    margin-bottom: 20px;
+    width: 100%;
+    text-align: center;
+    font-size: clamp(12px, 2vw, 19px);
+}
+
+.btn_pr {
+    width: 150px;
+    height: 30px;
+    margin: 5px;
+    padding: 4px;
+    cursor: pointer;
+    border: transparent;
+    border-radius: 20px;
+}
+
+/* __________________ SLIDER __________________ */
+
+.slider {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    transition: opacity 0.5s ease-in-out;
+    color: #aeaeae;
+}
+
+.fade-in {
+    opacity: 1;
+}
+
+.fade-out {
+    opacity: 0;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sliderDitels {
+    position: absolute;
+    top: 70%;
+    margin-left: 2%;
+}
+
+.sliderDitels .bg {
+    padding: 10px;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    color: antiquewhite;
+}
+
+.sliderDitels p {
+    border-radius: 10px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 10px;
+}
+
+.sliderDitels h2 {
+    width: fit-content;
+    border-radius: 10px;
+    border-bottom-left-radius: 0px;
+}
+
+/* __________________ RESPONSIVE __________________ */
+
+@media (max-width: 780px) {
+    .sideImage {
+        display: none;
+    }
+
+    .aside_ {
+        width: 100%;
+        padding: 10px 20px 10px 20px;
+        border: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .owner_customers {
+        margin-top: 3%;
+        margin-bottom: 1.5%;
+
+    }
+
+    .aside_ {
+        padding: 10px 0px 10px 0px;
+        border: none;
+    }
+
+    .p {
+        padding: 0px 5px 0px 5px;
+    }
+}
