@@ -10,80 +10,91 @@ import Testimonial from "./Testimonial/Testimonial";
 import AboutHighlights from "./AboutHighlights/AboutHighlights";
 
 const districts = [
-  "Agra", "Aligarh", "Ambedkar Nagar", "Amethi", "Amroha",
-  "Auraiya", "Ayodhya", "Azamgarh", "Baghpat", "Bahraich",
-  "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly",
-  "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr",
-  "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah",
-  "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar",
-  "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur",
-  "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi",
-  "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj",
-  "Kaushambi", "Kushinagar", "Lakhimpur Kheri", "Lalitpur",
-  "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura",
-  "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar",
-  "Pilibhit", "Pratapgarh", "Prayagraj", "Raebareli", "Rampur",
-  "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur",
-  "Shamli", "Shravasti", "Siddharthnagar", "Sitapur",
-  "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"
+  "Agra","Aligarh","Ambedkar Nagar","Amethi","Amroha",
+  "Auraiya","Ayodhya","Azamgarh","Baghpat","Bahraich",
+  "Ballia","Balrampur","Banda","Barabanki","Bareilly",
+  "Basti","Bhadohi","Bijnor","Budaun","Bulandshahr",
+  "Chandauli","Chitrakoot","Deoria","Etah","Etawah",
+  "Farrukhabad","Fatehpur","Firozabad","Gautam Buddha Nagar",
+  "Ghaziabad","Ghazipur","Gonda","Gorakhpur","Hamirpur",
+  "Hapur","Hardoi","Hathras","Jalaun","Jaunpur","Jhansi",
+  "Kannauj","Kanpur Dehat","Kanpur Nagar","Kasganj",
+  "Kaushambi","Kushinagar","Lakhimpur Kheri","Lalitpur",
+  "Lucknow","Maharajganj","Mahoba","Mainpuri","Mathura",
+  "Mau","Meerut","Mirzapur","Moradabad","Muzaffarnagar",
+  "Pilibhit","Pratapgarh","Prayagraj","Raebareli","Rampur",
+  "Saharanpur","Sambhal","Sant Kabir Nagar","Shahjahanpur",
+  "Shamli","Shravasti","Siddharthnagar","Sitapur",
+  "Sonbhadra","Sultanpur","Unnao","Varanasi"
 ];
 
 const heavyVehicles = [
-  "Truck",
-  "Bus",
-  "Trailer",
-  "Dump Truck",
-  "Cement Mixer",
-  "Bulldozer",
-  "Crane",
-  "Excavator"
+  "Truck","Bus","Trailer","Dump Truck",
+  "Cement Mixer","Bulldozer","Crane","Excavator"
 ];
 
+// 🔥 IMPORTANT: single base URL (clean + safe)
+const API_BASE_URL =
+  "https://heavy-vehicle-booking-production.up.railway.app";
+
 function UserD() {
- const [district, setDistrict] = useState("");
+  const [district, setDistrict] = useState("");
   const [vehicle, setVehicle] = useState("");
   const navigate = useNavigate();
 
-const handleSubmit = async () => {
+  const handleSubmit = async () => {
     try {
       if (!district || !vehicle) {
         alert("Please select both fields");
         return;
       }
 
-     const res = await axios.get(
-  `https://heavy-vehicle-booking-production.up.railway.app/search?vehicleName=${vehicle}&district=${district}`
-);
+      const res = await axios.get(
+        `${API_BASE_URL}/search`,
+        {
+          params: {
+            vehicleName: vehicle,
+            district: district,
+          },
+        }
+      );
+
+      if (!res.data) {
+        throw new Error("No data received");
+      }
+
+      // save for refresh safety
+      localStorage.setItem("searchData", JSON.stringify(res.data));
 
       navigate("/searchdata", { state: res.data });
 
     } catch (err) {
-      console.log(err);
-      alert("Error fetching data");
+      console.error("Search error:", err);
+      alert("Error fetching data. Please try again.");
     }
   };
-
 
   return (
     <>
       <div className="nav">
         <Navbar />
       </div>
+
       <div className="landingPage">
         <div className="leftContent">
           <div className="Search">
             <div className="headingSearch">
-             <div className="all">
-               <span className="No1">India’s #1</span><br />
-              <span className="App">Heavy Vehicle App</span><br />
-              <span className="Booking">Find Vehicles in Your District</span>
-             </div>
+              <div className="all">
+                <span className="No1">India’s #1</span><br />
+                <span className="App">Heavy Vehicle App</span><br />
+                <span className="Booking">Find Vehicles in Your District</span>
+              </div>
 
               <div className="input">
 
                 <select
                   className="select"
-                   value={district}
+                  value={district}
                   onChange={(e) => setDistrict(e.target.value)}
                 >
                   <option value="">-- Select District --</option>
@@ -103,9 +114,13 @@ const handleSubmit = async () => {
                   ))}
                 </select>
 
-                <button onClick={handleSubmit} className="subbmitDistrict">
+                <button
+                  onClick={handleSubmit}
+                  className="subbmitDistrict"
+                >
                   Search Vehicle
                 </button>
+
               </div>
             </div>
           </div>
@@ -117,25 +132,29 @@ const handleSubmit = async () => {
           </div>
         </div>
       </div>
+
       <div className="ServicesInUserD">
-        <Services/>
+        <Services />
       </div>
+
       <div className="EarnInUser">
-        <Earn/>
+        <Earn />
       </div>
+
       <div className="testimoniall">
-              <div className="headindS">
-        <h1>Happy Customers</h1>
-        <span className="borderLine"></span>
+        <div className="headindS">
+          <h1>Happy Customers</h1>
+          <span className="borderLine"></span>
+        </div>
+        <Testimonial />
       </div>
-        <Testimonial/>
-      </div>
+
       <div className="whyChooseUS">
-          <div className="boxInChoose headindS ">
-         <h1>Why Choose Us</h1>
-         <span className='borderLine' ></span>
-     </div>
-        <AboutHighlights/>
+        <div className="boxInChoose headindS">
+          <h1>Why Choose Us</h1>
+          <span className="borderLine"></span>
+        </div>
+        <AboutHighlights />
       </div>
     </>
   );

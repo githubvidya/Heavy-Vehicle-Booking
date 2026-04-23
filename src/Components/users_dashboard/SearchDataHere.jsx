@@ -10,26 +10,23 @@ function SearchDataHere() {
     JSON.parse(localStorage.getItem("searchData")) ||
     [];
 
-  // ✅ Form state
   const [showForm, setShowForm] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [userName, setUserName] = useState("");
   const [userMobile, setUserMobile] = useState("");
 
-  // ✅ Full Image Popup state
   const [fullImage, setFullImage] = useState(null);
 
+  // ❗ safer check
   if (!Array.isArray(data) || data.length === 0) {
     return <h2 className="noResult">No results found</h2>;
   }
 
-  // ✅ Open booking form
   const openForm = (vehicleId) => {
     setSelectedVehicle(vehicleId);
     setShowForm(true);
   };
 
-  // ✅ Booking function
   const handleBooking = async () => {
     if (!userName || !userMobile) {
       alert("Please enter name and mobile number");
@@ -42,34 +39,40 @@ function SearchDataHere() {
     }
 
     try {
-    const res = await fetch(
-  "https://heavy-vehicle-booking-production.up.railway.app/book",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-        body: JSON.stringify({
-          vehicleId: selectedVehicle,
-          userName,
-          userMobile
-        }),
-      });
+      const res = await fetch(
+        "https://heavy-vehicle-booking-production.up.railway.app/book",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            vehicleId: selectedVehicle,
+            userName,
+            userMobile,
+          }),
+        }
+      );
 
-      const data = await res.json();
-
-      if (data.whatsappURL) {
-        window.open(data.whatsappURL, "_blank");
+      // ❗ safety check (important fix)
+      if (!res.ok) {
+        throw new Error("Network response was not ok");
       }
 
-      alert(data.message);
+      const result = await res.json();
+
+      if (result.whatsappURL) {
+        window.open(result.whatsappURL, "_blank");
+      }
+
+      alert(result.message);
 
       setShowForm(false);
       setUserName("");
       setUserMobile("");
-
     } catch (err) {
-      console.error(err);
+      console.error("Booking error:", err);
+      alert("Booking failed. Try again.");
     }
   };
 
@@ -82,14 +85,14 @@ function SearchDataHere() {
 
       <div className="searchGrid">
         {data.map((item) => (
-          <div key={item._id || item.name} className="searchCard">
+          <div key={item._id} className="searchCard">
 
             {item.photo && (
               <img
                 src={item.photo}
                 alt="vehicle"
                 className="vehicleImg"
-                onClick={() => setFullImage(item.photo)} // ✅ click to view full
+                onClick={() => setFullImage(item.photo)}
               />
             )}
 
@@ -99,7 +102,7 @@ function SearchDataHere() {
               <p><strong>District:</strong> {item.district}</p>
               <p><strong>Address:</strong> {item.address}</p>
               <p><strong>Price:</strong> {item.price}</p>
-              <p><strong>MobileNumber:</strong> {item.mobilenumber}</p>
+              <p><strong>Mobile:</strong> {item.mobilenumber}</p>
 
               <button onClick={() => openForm(item._id)}>
                 Book Now
@@ -109,7 +112,7 @@ function SearchDataHere() {
         ))}
       </div>
 
-      {/* ✅ FULL IMAGE POPUP */}
+      {/* FULL IMAGE */}
       {fullImage && (
         <div
           className="modalOverlay"
@@ -119,7 +122,7 @@ function SearchDataHere() {
         </div>
       )}
 
-      {/* ✅ BOOKING FORM */}
+      {/* BOOKING FORM */}
       {showForm && (
         <div className="modalOverlay">
           <div className="modalBox">
@@ -140,8 +143,12 @@ function SearchDataHere() {
             />
 
             <div className="modalButtons">
-              <button onClick={handleBooking}>Confirm Booking</button>
-              <button onClick={() => setShowForm(false)}>Cancel</button>
+              <button onClick={handleBooking}>
+                Confirm Booking
+              </button>
+              <button onClick={() => setShowForm(false)}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>
