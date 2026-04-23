@@ -25,11 +25,25 @@ if (!fs.existsSync("uploads")) {
 // ===================== MIDDLEWARE =====================
 
 // ✅ FIXED CORS (works with Netlify + testing)
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+app.use(cors({
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "https://chimerical-stroopwafel-0df353.netlify.app",
+      "http://localhost:5173"
+    ];
+
+    // allow requests with no origin (mobile apps / postman / railway health checks)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "DELETE", "PUT"],
+  credentials: true
+}));
 
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

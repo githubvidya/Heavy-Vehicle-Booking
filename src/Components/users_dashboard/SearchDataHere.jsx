@@ -7,17 +7,15 @@ function SearchDataHere() {
 
   const data =
     location.state ||
-    JSON.parse(localStorage.getItem("searchData")) ||
-    [];
+    JSON.parse(localStorage.getItem("searchData") || "[]");
 
   const [showForm, setShowForm] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [userName, setUserName] = useState("");
   const [userMobile, setUserMobile] = useState("");
-
   const [fullImage, setFullImage] = useState(null);
 
-  // ❗ safer check
+  // ❗ SAFE CHECK (improved)
   if (!Array.isArray(data) || data.length === 0) {
     return <h2 className="noResult">No results found</h2>;
   }
@@ -54,12 +52,11 @@ function SearchDataHere() {
         }
       );
 
-      // ❗ safety check (important fix)
-      if (!res.ok) {
-        throw new Error("Network response was not ok");
-      }
-
       const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result?.message || "Booking failed");
+      }
 
       if (result.whatsappURL) {
         window.open(result.whatsappURL, "_blank");
@@ -70,6 +67,7 @@ function SearchDataHere() {
       setShowForm(false);
       setUserName("");
       setUserMobile("");
+
     } catch (err) {
       console.error("Booking error:", err);
       alert("Booking failed. Try again.");
@@ -78,6 +76,7 @@ function SearchDataHere() {
 
   return (
     <div className="searchContainer">
+
       <div className="headindS">
         <h1>Happy Customers</h1>
         <span className="borderLine"></span>
@@ -108,16 +107,14 @@ function SearchDataHere() {
                 Book Now
               </button>
             </div>
+
           </div>
         ))}
       </div>
 
       {/* FULL IMAGE */}
       {fullImage && (
-        <div
-          className="modalOverlay"
-          onClick={() => setFullImage(null)}
-        >
+        <div className="modalOverlay" onClick={() => setFullImage(null)}>
           <img src={fullImage} className="fullImageView" alt="full" />
         </div>
       )}
@@ -153,6 +150,7 @@ function SearchDataHere() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
