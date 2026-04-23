@@ -22,7 +22,9 @@ if (!fs.existsSync("uploads")) {
 }
 
 // ===================== MIDDLEWARE =====================
-app.use(cors());
+app.use(cors({
+  origin: "https://chimerical-stroopwafel-0df353.netlify.app/"
+}));
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
