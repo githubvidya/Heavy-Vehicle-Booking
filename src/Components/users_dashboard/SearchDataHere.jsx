@@ -7,7 +7,8 @@ function SearchDataHere() {
 
   const data =
     location.state ||
-    JSON.parse(localStorage.getItem("searchData") || "[]");
+    JSON.parse(localStorage.getItem("searchData")) ||
+    [];
 
   const [showForm, setShowForm] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -15,7 +16,18 @@ function SearchDataHere() {
   const [userMobile, setUserMobile] = useState("");
   const [fullImage, setFullImage] = useState(null);
 
-  // ❗ SAFE CHECK (improved)
+  // ✅ FIX IMAGE FUNCTION
+  const fixImage = (url) => {
+    if (!url) return null;
+
+    return url.includes("localhost")
+      ? url.replace(
+          "http://localhost:5000",
+          "https://heavy-vehicle-booking-production.up.railway.app"
+        )
+      : url;
+  };
+
   if (!Array.isArray(data) || data.length === 0) {
     return <h2 className="noResult">No results found</h2>;
   }
@@ -86,12 +98,13 @@ function SearchDataHere() {
         {data.map((item) => (
           <div key={item._id} className="searchCard">
 
+            {/* ✅ FIXED IMAGE */}
             {item.photo && (
               <img
-                src={item.photo}
+                src={fixImage(item.photo)}
                 alt="vehicle"
                 className="vehicleImg"
-                onClick={() => setFullImage(item.photo)}
+                onClick={() => setFullImage(fixImage(item.photo))}
               />
             )}
 
@@ -115,7 +128,11 @@ function SearchDataHere() {
       {/* FULL IMAGE */}
       {fullImage && (
         <div className="modalOverlay" onClick={() => setFullImage(null)}>
-          <img src={fullImage} className="fullImageView" alt="full" />
+          <img
+            src={fullImage}
+            className="fullImageView"
+            alt="full"
+          />
         </div>
       )}
 
