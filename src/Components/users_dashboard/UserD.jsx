@@ -51,9 +51,9 @@ const handleSubmit = async () => {
         return;
       }
 
-      const res = await axios.get(
-        `http://localhost:5000/search?vehicleName=${vehicle}&district=${district}`
-      );
+     const res = await axios.get(
+  `https://heavy-vehicle-booking-production.up.railway.app/search?vehicleName=${vehicle}&district=${district}`
+);
 
       navigate("/searchdata", { state: res.data });
 

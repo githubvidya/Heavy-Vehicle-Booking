@@ -42,11 +42,13 @@ function SearchDataHere() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/book", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+    const res = await fetch(
+  "https://heavy-vehicle-booking-production.up.railway.app/book",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
         body: JSON.stringify({
           vehicleId: selectedVehicle,
           userName,

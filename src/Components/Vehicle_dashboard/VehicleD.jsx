@@ -73,7 +73,10 @@ const VehicleD = () => {
 
       formData.append("photo", file);
 
-      await axios.post("http://localhost:5000/add", formData);
+    await axios.post(
+  "https://heavy-vehicle-booking-production.up.railway.app/add",
+  formData
+);
 
       alert("✅ Vehicle Added Successfully");
 
