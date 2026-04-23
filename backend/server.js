@@ -8,22 +8,19 @@ const path = require("path");
 
 const app = express();
 
-// ✅ PORT (Railway compatible)
+// ===================== PORT =====================
 const PORT = process.env.PORT || 5000;
 
-// ✅ BASE URL
+// ===================== BASE URL =====================
 const BASE_URL =
-  process.env.BASE_URL ||
-  (process.env.NODE_ENV === "production"
-    ? ""
-    : `http://localhost:${PORT}`);
+  process.env.BASE_URL || `http://localhost:${PORT}`;
 
 // ===================== MIDDLEWARE =====================
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-// ✅ ROOT ROUTE (IMPORTANT for Railway test)
+// ===================== ROOT ROUTE =====================
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
@@ -108,7 +105,6 @@ app.get("/vehicles", async (req, res) => {
 
     const updated = data.map((item) => ({
       ...item._doc,
-      mobilenumber: item.mobilenumber || null,
       photo: item.photo
         ? `${BASE_URL}/uploads/${item.photo}`
         : null,
@@ -138,7 +134,6 @@ app.get("/search", async (req, res) => {
 
     const updated = data.map((item) => ({
       ...item._doc,
-      mobilenumber: item.mobilenumber || null,
       photo: item.photo
         ? `${BASE_URL}/uploads/${item.photo}`
         : null,
@@ -161,7 +156,6 @@ app.get("/vehicles/:id", async (req, res) => {
 
     res.json({
       ...v._doc,
-      mobilenumber: v.mobilenumber || null,
       photo: v.photo
         ? `${BASE_URL}/uploads/${v.photo}`
         : null,
@@ -201,12 +195,6 @@ app.post("/book", async (req, res) => {
       return res.status(404).json({ message: "Vehicle not found" });
     }
 
-    if (!vehicle.mobilenumber) {
-      return res
-        .status(400)
-        .json({ message: "Owner mobile not available" });
-    }
-
     const message = `Hello, you have a new booking!\n\nCustomer: ${userName}\nMobile: ${userMobile}\nVehicle: ${vehicle.vehicleName}`;
 
     const whatsappURL = `https://wa.me/91${vehicle.mobilenumber}?text=${encodeURIComponent(
@@ -227,6 +215,6 @@ app.post("/book", async (req, res) => {
 });
 
 // ===================== START SERVER =====================
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on ${PORT}`);
 });
