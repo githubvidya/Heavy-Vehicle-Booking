@@ -5,35 +5,47 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
 
 // ===================== PORT =====================
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 // ===================== BASE URL =====================
 const BASE_URL =
   process.env.BASE_URL || `http://localhost:${PORT}`;
 
+// ===================== CREATE UPLOADS FOLDER =====================
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
 // ===================== MIDDLEWARE =====================
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ===================== ROOT ROUTE =====================
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
 
-// ===================== DATABASE =====================
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log("Mongo Error:", err));
+// ===================== SAFE MONGO CONNECTION =====================
+if (!process.env.MONGO_URI) {
+  console.error("❌ MONGO_URI is missing in environment variables");
+} else {
+  mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => console.log("✅ MongoDB Connected"))
+    .catch((err) => console.log("❌ Mongo Error:", err));
+}
 
 // ===================== MULTER =====================
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   },
@@ -49,11 +61,7 @@ const VehicleSchema = new mongoose.Schema({
   price: String,
   district: String,
   photo: String,
-  mobilenumber: {
-    type: String,
-    required: true,
-    trim: true,
-  },
+  mobilenumber: { type: String, required: true, trim: true },
   bookings: { type: Number, default: 0 },
 });
 
@@ -72,9 +80,9 @@ app.post("/add", upload.single("photo"), async (req, res) => {
     } = req.body;
 
     if (!mobilenumber || mobilenumber.length !== 10) {
-      return res
-        .status(400)
-        .json({ message: "Valid 10-digit mobile number required" });
+      return res.status(400).json({
+        message: "Valid 10-digit mobile number required",
+      });
     }
 
     const newVehicle = new Vehicle({
@@ -180,19 +188,23 @@ app.delete("/vehicles/:id", async (req, res) => {
   }
 });
 
-// ===================== BOOK VEHICLE =====================
+// ===================== BOOK =====================
 app.post("/book", async (req, res) => {
   try {
     const { vehicleId, userName, userMobile } = req.body;
 
     if (!userName || !userMobile) {
-      return res.status(400).json({ message: "User details required" });
+      return res.status(400).json({
+        message: "User details required",
+      });
     }
 
     const vehicle = await Vehicle.findById(vehicleId);
 
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehicle not found" });
+      return res.status(404).json({
+        message: "Vehicle not found",
+      });
     }
 
     const message = `Hello, you have a new booking!\n\nCustomer: ${userName}\nMobile: ${userMobile}\nVehicle: ${vehicle.vehicleName}`;
@@ -216,5 +228,5 @@ app.post("/book", async (req, res) => {
 
 // ===================== START SERVER =====================
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
