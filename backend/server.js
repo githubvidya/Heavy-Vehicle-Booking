@@ -8,37 +8,43 @@ const path = require("path");
 
 const app = express();
 
+// ✅ PORT (Railway compatible)
 const PORT = process.env.PORT || 5000;
 
+// ✅ BASE URL
 const BASE_URL =
   process.env.BASE_URL ||
   (process.env.NODE_ENV === "production"
     ? ""
     : `http://localhost:${PORT}`);
 
-// _____________________________MIDDLEWARES____________________
+// ===================== MIDDLEWARE =====================
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-// _________________________________DATABASE_________________________
+// ✅ ROOT ROUTE (IMPORTANT for Railway test)
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
 
-mongoose.connect(process.env.MONGO_URI)
+// ===================== DATABASE =====================
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log("Mongo Error:", err));
+  .catch((err) => console.log("Mongo Error:", err));
 
-// _____________________________________MULTER SETUP_________________________
+// ===================== MULTER =====================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
-  }
+  },
 });
 
 const upload = multer({ storage });
 
-// _______________________________________SCHEMA________________________
-
+// ===================== SCHEMA =====================
 const VehicleSchema = new mongoose.Schema({
   name: { type: String, required: true },
   address: String,
@@ -49,15 +55,14 @@ const VehicleSchema = new mongoose.Schema({
   mobilenumber: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
-  bookings: { type: Number, default: 0 }
+  bookings: { type: Number, default: 0 },
 });
 
 const Vehicle = mongoose.model("Vehicle", VehicleSchema);
 
-//___________________________________________ADD VEHICLE______________________________
-
+// ===================== ADD VEHICLE =====================
 app.post("/add", upload.single("photo"), async (req, res) => {
   try {
     const {
@@ -66,13 +71,13 @@ app.post("/add", upload.single("photo"), async (req, res) => {
       vehicleName,
       price,
       district,
-      mobilenumber
+      mobilenumber,
     } = req.body;
 
-    // ________________________________________VALIDATION_________________________________
-
     if (!mobilenumber || mobilenumber.length !== 10) {
-      return res.status(400).json({ message: "Valid mobile number required" });
+      return res
+        .status(400)
+        .json({ message: "Valid 10-digit mobile number required" });
     }
 
     const newVehicle = new Vehicle({
@@ -82,41 +87,40 @@ app.post("/add", upload.single("photo"), async (req, res) => {
       price,
       district,
       mobilenumber,
-      photo: req.file ? req.file.filename : null
+      photo: req.file ? req.file.filename : null,
     });
 
     await newVehicle.save();
 
     res.status(201).json({
       message: "Vehicle saved successfully",
-      data: newVehicle
+      data: newVehicle,
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// _______________________________________________GET ALL VEHICLES_______________________________
+// ===================== GET ALL =====================
 app.get("/vehicles", async (req, res) => {
   try {
     const data = await Vehicle.find();
 
-    const updated = data.map(item => ({
+    const updated = data.map((item) => ({
       ...item._doc,
       mobilenumber: item.mobilenumber || null,
-      photo: item.photo ? `${BASE_URL}/uploads/${item.photo}` : null
+      photo: item.photo
+        ? `${BASE_URL}/uploads/${item.photo}`
+        : null,
     }));
 
     res.json(updated);
-
   } catch (err) {
     res.status(500).json({ error: "Fetch error" });
   }
 });
 
-// ____________________________________________SEARCH____________________________
-
+// ===================== SEARCH =====================
 app.get("/search", async (req, res) => {
   try {
     const { vehicleName, district } = req.query;
@@ -132,21 +136,21 @@ app.get("/search", async (req, res) => {
 
     const data = await Vehicle.find(query);
 
-    const updated = data.map(item => ({
+    const updated = data.map((item) => ({
       ...item._doc,
       mobilenumber: item.mobilenumber || null,
-      photo: item.photo ? `${BASE_URL}/uploads/${item.photo}` : null
+      photo: item.photo
+        ? `${BASE_URL}/uploads/${item.photo}`
+        : null,
     }));
 
     res.json(updated);
-
   } catch (err) {
     res.status(500).json({ error: "Search failed" });
   }
 });
 
-// ____________________________________________________GET SINGLE VEHICLE__________________________________
-
+// ===================== GET ONE =====================
 app.get("/vehicles/:id", async (req, res) => {
   try {
     const v = await Vehicle.findById(req.params.id);
@@ -158,16 +162,16 @@ app.get("/vehicles/:id", async (req, res) => {
     res.json({
       ...v._doc,
       mobilenumber: v.mobilenumber || null,
-      photo: v.photo ? `${BASE_URL}/uploads/${v.photo}` : null
+      photo: v.photo
+        ? `${BASE_URL}/uploads/${v.photo}`
+        : null,
     });
-
   } catch (err) {
     res.status(500).json({ error: "Error fetching vehicle" });
   }
 });
 
-//___________________________________________ DELETE VEHICLE_________________________________________
-
+// ===================== DELETE =====================
 app.delete("/vehicles/:id", async (req, res) => {
   try {
     const d = await Vehicle.findByIdAndDelete(req.params.id);
@@ -177,14 +181,12 @@ app.delete("/vehicles/:id", async (req, res) => {
     }
 
     res.json({ message: "Deleted successfully" });
-
   } catch (err) {
     res.status(500).json({ error: "Delete error" });
   }
 });
 
-// ________________________________________________BOOK VEHICLE (WITH WHATSAPP NOTIFICATION)________________________________________
-
+// ===================== BOOK VEHICLE =====================
 app.post("/book", async (req, res) => {
   try {
     const { vehicleId, userName, userMobile } = req.body;
@@ -200,29 +202,31 @@ app.post("/book", async (req, res) => {
     }
 
     if (!vehicle.mobilenumber) {
-      return res.status(400).json({ message: "Owner mobile not available" });
+      return res
+        .status(400)
+        .json({ message: "Owner mobile not available" });
     }
-
-    // __________________________________________________________ WhatsApp Message____________________________________
 
     const message = `Hello, you have a new booking!\n\nCustomer: ${userName}\nMobile: ${userMobile}\nVehicle: ${vehicle.vehicleName}`;
 
-    const whatsappURL = `https://wa.me/91${vehicle.mobilenumber}?text=${encodeURIComponent(message)}`;
+    const whatsappURL = `https://wa.me/91${vehicle.mobilenumber}?text=${encodeURIComponent(
+      message
+    )}`;
 
     await Vehicle.findByIdAndUpdate(vehicleId, {
-      $inc: { bookings: 1 }
+      $inc: { bookings: 1 },
     });
 
     res.json({
       message: "Booking successful",
-      whatsappURL
+      whatsappURL,
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// ===================== START SERVER =====================
 app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
