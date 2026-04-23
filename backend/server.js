@@ -13,9 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // ===================== BASE URL (FIXED) =====================
-const BASE_URL =
-  process.env.BASE_URL ||
-  "https://heavy-vehicle-booking-production.up.railway.app";
+const BASE_URL = process.env.BASE_URL;
 
 // ===================== CREATE UPLOADS FOLDER =====================
 if (!fs.existsSync("uploads")) {
