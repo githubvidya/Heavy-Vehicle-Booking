@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "https://ornate-alfajores-57b8fd.netlify.app",
+      "https://heavy-vehicle.netlify.app",
       "http://localhost:5173",
     ],
     methods: ["GET", "POST", "DELETE", "PUT"],
