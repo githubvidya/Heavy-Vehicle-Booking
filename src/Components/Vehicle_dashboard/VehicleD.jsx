@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import LoadingPage from "../Vehicle_dashboard/LodingPage";
 import "./Vehicle.css";
 
 const API_BASE =
@@ -7,25 +8,34 @@ const API_BASE =
 
 const VehicleD = () => {
   const districts = [
-    "Agra","Aligarh","Ambedkar Nagar","Amethi","Amroha",
-    "Auraiya","Ayodhya","Azamgarh","Baghpat","Bahraich",
-    "Ballia","Balrampur","Banda","Barabanki","Bareilly",
-    "Basti","Bhadohi","Bijnor","Budaun","Bulandshahr",
-    "Chandauli","Chitrakoot","Deoria","Etah","Etawah",
-    "Farrukhabad","Fatehpur","Firozabad","Gautam Buddha Nagar",
-    "Ghaziabad","Ghazipur","Gonda","Gorakhpur","Hamirpur",
-    "Hapur","Hardoi","Hathras","Jalaun","Jaunpur","Jhansi",
-    "Kannauj","Kanpur Dehat","Kanpur Nagar","Kasganj",
-    "Kaushambi","Kushinagar","Lakhimpur Kheri","Lalitpur",
-    "Lucknow","Maharajganj","Mahoba","Mainpuri","Mathura",
-    "Mau","Meerut","Mirzapur","Moradabad","Muzaffarnagar",
-    "Pilibhit","Pratapgarh","Prayagraj","Raebareli","Rampur",
-    "Saharanpur","Sambhal","Sant Kabir Nagar","Shahjahanpur",
-    "Shamli","Shravasti","Siddharthnagar","Sitapur",
-    "Sonbhadra","Sultanpur","Unnao","Varanasi"
+    "Agra", "Aligarh", "Ambedkar Nagar", "Amethi", "Amroha",
+    "Auraiya", "Ayodhya", "Azamgarh", "Baghpat", "Bahraich",
+    "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly",
+    "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr",
+    "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah",
+    "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar",
+    "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur",
+    "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi",
+    "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj",
+    "Kaushambi", "Kushinagar", "Lakhimpur Kheri", "Lalitpur",
+    "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura",
+    "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar",
+    "Pilibhit", "Pratapgarh", "Prayagraj", "Raebareli", "Rampur",
+    "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur",
+    "Shamli", "Shravasti", "Siddharthnagar", "Sitapur",
+    "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"
   ];
 
-  const heavyVehicles = ["Truck","Bus","Trailer","Crane","Excavator"];
+  const heavyVehicles = [
+    "Truck",
+    "Bus",
+    "Trailer",
+    "Crane",
+    "Excavator"
+  ];
+
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -40,7 +50,10 @@ const VehicleD = () => {
   const [preview, setPreview] = useState(null);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleFileChange = (e) => {
@@ -55,6 +68,8 @@ const VehicleD = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setSuccessMessage("");
+
     if (!form.name || !form.vehicleName) {
       alert("Name and Vehicle Name are required");
       return;
@@ -65,6 +80,8 @@ const VehicleD = () => {
       return;
     }
 
+    setLoading(true);
+
     try {
       const formData = new FormData();
 
@@ -72,7 +89,6 @@ const VehicleD = () => {
         formData.append(key, value);
       });
 
-      // only append photo if exists
       if (file) {
         formData.append("photo", file);
       }
@@ -87,9 +103,9 @@ const VehicleD = () => {
         }
       );
 
-      alert("✅ Vehicle Added Successfully");
-
       console.log(res.data);
+
+      setSuccessMessage("✅ Vehicle Added Successfully!");
 
       setForm({
         name: "",
@@ -102,16 +118,20 @@ const VehicleD = () => {
 
       setFile(null);
       setPreview(null);
-
     } catch (err) {
       console.error("Upload error:", err);
       alert("❌ Error saving data");
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (loading) {
+    return <LoadingPage />;
+  }
+
   return (
     <div className="ownerContainer">
-
       <div className="welcomeBox">
         <h1>Welcome Owner 🚚</h1>
         <p>
@@ -120,17 +140,19 @@ const VehicleD = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="formCard">
-
         <h2>Add Your Vehicle</h2>
 
         <input
+          type="text"
           name="name"
           placeholder="Owner Name"
           value={form.name}
           onChange={handleChange}
+          required
         />
 
         <input
+          type="text"
           name="address"
           placeholder="Address"
           value={form.address}
@@ -141,14 +163,18 @@ const VehicleD = () => {
           name="vehicleName"
           value={form.vehicleName}
           onChange={handleChange}
+          required
         >
           <option value="">Select Vehicle</option>
-          {heavyVehicles.map((v, i) => (
-            <option key={i} value={v}>{v}</option>
+          {heavyVehicles.map((vehicle, index) => (
+            <option key={index} value={vehicle}>
+              {vehicle}
+            </option>
           ))}
         </select>
 
         <input
+          type="number"
           name="price"
           placeholder="Price"
           value={form.price}
@@ -156,11 +182,13 @@ const VehicleD = () => {
         />
 
         <input
+          type="tel"
           name="mobilenumber"
           placeholder="Mobile Number"
           value={form.mobilenumber}
           onChange={handleChange}
           maxLength={10}
+          required
         />
 
         <select
@@ -169,21 +197,38 @@ const VehicleD = () => {
           onChange={handleChange}
         >
           <option value="">Select District</option>
-          {districts.map((d, i) => (
-            <option key={i} value={d}>{d}</option>
+          {districts.map((district, index) => (
+            <option key={index} value={district}>
+              {district}
+            </option>
           ))}
         </select>
 
-        <input type="file" onChange={handleFileChange} />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
 
         {preview && (
-          <img src={preview} alt="preview" className="previewImg" />
+          <img
+            src={preview}
+            alt="Vehicle Preview"
+            className="previewImg"
+          />
         )}
 
-        <button type="submit">Submit</button>
-
+        <button type="submit">
+          Submit
+        </button>
       </form>
+          {successMessage && (
+          <p className="successMessage">
+            {successMessage}
+          </p>
+        )}
     </div>
+    
   );
 };
 

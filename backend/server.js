@@ -12,54 +12,33 @@ const app = express();
 // ===================== PORT =====================
 const PORT = process.env.PORT || 8080;
 
-// ===================== BASE URL (FIXED) =====================
-const BASE_URL = process.env.BASE_URL;
+// ===================== MIDDLEWARE =====================
+app.use(express.json());
 
-// ===================== CREATE UPLOADS FOLDER =====================
+app.use(
+  cors({
+    origin: [
+      "https://chimerical-stroopwafel-0df353.netlify.app",
+      "http://localhost:5173",
+    ],
+    methods: ["GET", "POST", "DELETE", "PUT"],
+    credentials: true,
+  })
+);
+
+// serve images
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ===================== CREATE UPLOAD FOLDER =====================
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
 }
 
-// ===================== MIDDLEWARE =====================
-
-// ✅ FIXED CORS (works with Netlify + testing)
-app.use(cors({
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      "https://chimerical-stroopwafel-0df353.netlify.app",
-      "http://localhost:5173"
-    ];
-
-    // allow requests with no origin (mobile apps / postman / railway health checks)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "DELETE", "PUT"],
-  credentials: true
-}));
-
-app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// ===================== ROOT =====================
-app.get("/", (req, res) => {
-  res.send("API is running 🚀");
-});
-
 // ===================== MONGO =====================
-if (!process.env.MONGO_URI) {
-  console.error("❌ MONGO_URI missing");
-} else {
-  mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ MongoDB Connected"))
-    .catch((err) => console.log("❌ Mongo Error:", err));
-}
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.log("❌ Mongo Error:", err));
 
 // ===================== MULTER =====================
 const storage = multer.diskStorage({
@@ -70,31 +49,36 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ===================== SCHEMA =====================
+// ===================== MODEL =====================
 const VehicleSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: String,
   address: String,
   vehicleName: String,
   price: String,
   district: String,
-  photo: String,
-  mobilenumber: { type: String, required: true, trim: true },
+  photo: String, // filename only
+  mobilenumber: String,
   bookings: { type: Number, default: 0 },
 });
 
 const Vehicle = mongoose.model("Vehicle", VehicleSchema);
 
+// ===================== FORMAT FUNCTION =====================
+const formatVehicle = (v) => ({
+  ...v._doc,
+  photo: v.photo ? `${process.env.BASE_URL}/uploads/${v.photo}` : null,
+});
+
+// ===================== ROOT =====================
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
+
 // ===================== ADD =====================
 app.post("/add", upload.single("photo"), async (req, res) => {
   try {
-    const {
-      name,
-      address,
-      vehicleName,
-      price,
-      district,
-      mobilenumber,
-    } = req.body;
+    const { name, address, vehicleName, price, district, mobilenumber } =
+      req.body;
 
     const newVehicle = new Vehicle({
       name,
@@ -121,15 +105,7 @@ app.post("/add", upload.single("photo"), async (req, res) => {
 app.get("/vehicles", async (req, res) => {
   try {
     const data = await Vehicle.find();
-
-    const updated = data.map((item) => ({
-      ...item._doc,
-      photo: item.photo
-        ? `${BASE_URL}/uploads/${item.photo}`
-        : null,
-    }));
-
-    res.json(updated);
+    res.json(data.map(formatVehicle));
   } catch (err) {
     res.status(500).json({ error: "Fetch error" });
   }
@@ -143,29 +119,16 @@ app.get("/search", async (req, res) => {
     const query = {};
 
     if (vehicleName) {
-      query.vehicleName = {
-        $regex: vehicleName,
-        $options: "i",
-      };
+      query.vehicleName = { $regex: vehicleName, $options: "i" };
     }
 
     if (district) {
-      query.district = {
-        $regex: district,
-        $options: "i",
-      };
+      query.district = { $regex: district, $options: "i" };
     }
 
     const data = await Vehicle.find(query);
 
-    const updated = data.map((item) => ({
-      ...item._doc,
-      photo: item.photo
-        ? `${BASE_URL}/uploads/${item.photo}`
-        : null,
-    }));
-
-    res.json(updated);
+    res.json(data.map(formatVehicle));
   } catch (err) {
     res.status(500).json({ error: "Search failed" });
   }
@@ -175,15 +138,9 @@ app.get("/search", async (req, res) => {
 app.get("/vehicles/:id", async (req, res) => {
   try {
     const v = await Vehicle.findById(req.params.id);
-
     if (!v) return res.status(404).json({ message: "Not found" });
 
-    res.json({
-      ...v._doc,
-      photo: v.photo
-        ? `${BASE_URL}/uploads/${v.photo}`
-        : null,
-    });
+    res.json(formatVehicle(v));
   } catch (err) {
     res.status(500).json({ error: "Error fetching vehicle" });
   }
@@ -193,7 +150,6 @@ app.get("/vehicles/:id", async (req, res) => {
 app.delete("/vehicles/:id", async (req, res) => {
   try {
     const d = await Vehicle.findByIdAndDelete(req.params.id);
-
     if (!d) return res.status(404).json({ message: "Not found" });
 
     res.json({ message: "Deleted successfully" });
@@ -208,7 +164,6 @@ app.post("/book", async (req, res) => {
     const { vehicleId, userName, userMobile } = req.body;
 
     const vehicle = await Vehicle.findById(vehicleId);
-
     if (!vehicle) {
       return res.status(404).json({ message: "Vehicle not found" });
     }

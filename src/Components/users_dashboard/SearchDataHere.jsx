@@ -1,6 +1,11 @@
 import { useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import "../users_dashboard/Search.css";
+import PageLoader from "../users_dashboard/PageLoader";
+
+const API_BASE_URL =
+  "https://heavy-vehicle-booking-production.up.railway.app";
+
 
 function SearchDataHere() {
   const location = useLocation();
@@ -15,22 +20,34 @@ function SearchDataHere() {
   const [userName, setUserName] = useState("");
   const [userMobile, setUserMobile] = useState("");
   const [fullImage, setFullImage] = useState(null);
+  
+  const [loading, setLoading] = useState(true);
 
-  // ✅ FIX IMAGE FUNCTION
-  const fixImage = (url) => {
-    if (!url) return null;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
 
-    return url.includes("localhost")
-      ? url.replace(
-          "http://localhost:5000",
-          "https://heavy-vehicle-booking-production.up.railway.app"
-        )
-      : url;
-  };
+    return () => clearTimeout(timer);
+  }, []);
 
-  if (!Array.isArray(data) || data.length === 0) {
-    return <h2 className="noResult">No results found</h2>;
+  if (loading) {
+    return <PageLoader />;
   }
+
+  // ✅ FINAL IMAGE FIX (IMPORTANT)
+const fixImage = (img) => {
+  if (!img) return "";
+
+  // already full URL
+  if (img.startsWith("http")) return img;
+
+  // remove ALL duplicates like uploads/uploads/
+  let clean = img.replace(/^\/+/, "");
+  clean = clean.replace(/uploads\//g, ""); // remove repeated uploads
+
+  return `${API_BASE_URL}/uploads/${clean}`;
+};
 
   const openForm = (vehicleId) => {
     setSelectedVehicle(vehicleId);
@@ -49,26 +66,19 @@ function SearchDataHere() {
     }
 
     try {
-      const res = await fetch(
-        "https://heavy-vehicle-booking-production.up.railway.app/book",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            vehicleId: selectedVehicle,
-            userName,
-            userMobile,
-          }),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vehicleId: selectedVehicle,
+          userName,
+          userMobile,
+        }),
+      });
 
       const result = await res.json();
 
-      if (!res.ok) {
-        throw new Error(result?.message || "Booking failed");
-      }
+      if (!res.ok) throw new Error(result.message);
 
       if (result.whatsappURL) {
         window.open(result.whatsappURL, "_blank");
@@ -81,12 +91,17 @@ function SearchDataHere() {
       setUserMobile("");
 
     } catch (err) {
-      console.error("Booking error:", err);
-      alert("Booking failed. Try again.");
+      console.error(err);
+      alert("Booking failed");
     }
   };
 
+  if (!Array.isArray(data) || data.length === 0) {
+    return <h2 className="noResult">No results found</h2>;
+  }
+
   return (
+    
     <div className="searchContainer">
 
       <div className="headindS">
@@ -98,7 +113,7 @@ function SearchDataHere() {
         {data.map((item) => (
           <div key={item._id} className="searchCard">
 
-            {/* ✅ FIXED IMAGE */}
+            {/* ✅ FIXED IMAGE HERE */}
             {item.photo && (
               <img
                 src={fixImage(item.photo)}
@@ -128,11 +143,7 @@ function SearchDataHere() {
       {/* FULL IMAGE */}
       {fullImage && (
         <div className="modalOverlay" onClick={() => setFullImage(null)}>
-          <img
-            src={fullImage}
-            className="fullImageView"
-            alt="full"
-          />
+          <img src={fullImage} className="fullImageView" alt="full" />
         </div>
       )}
 
@@ -157,12 +168,8 @@ function SearchDataHere() {
             />
 
             <div className="modalButtons">
-              <button onClick={handleBooking}>
-                Confirm Booking
-              </button>
-              <button onClick={() => setShowForm(false)}>
-                Cancel
-              </button>
+              <button onClick={handleBooking}>Confirm Booking</button>
+              <button onClick={() => setShowForm(false)}>Cancel</button>
             </div>
           </div>
         </div>
