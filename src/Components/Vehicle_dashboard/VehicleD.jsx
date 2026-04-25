@@ -204,19 +204,19 @@ const VehicleD = () => {
           ))}
         </select>
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-        />
+       <input
+  type="file"
+  accept="image/*"
+  onChange={handleFileChange}
+/>
 
-        {preview && (
-          <img
-            src={preview}
-            alt="Vehicle Preview"
-            className="previewImg"
-          />
-        )}
+{preview && (
+  <img
+    src={preview}
+    alt="Vehicle Preview"
+    className="vehicleImg"
+  />
+)}
 
         <button type="submit">
           Submit

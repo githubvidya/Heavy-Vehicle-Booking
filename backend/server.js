@@ -4,15 +4,21 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("./config/cloudinary");
 
 const app = express();
-
-// ===================== PORT =====================
+const BASE_URL =
+  process.env.BASE_URL ||
+  "https://heavy-vehicle-booking-production.up.railway.app";
+// ======================================================
+// PORT
+// ======================================================
 const PORT = process.env.PORT || 8080;
 
-// ===================== MIDDLEWARE =====================
+// ======================================================
+// MIDDLEWARE
+// ======================================================
 app.use(express.json());
 
 app.use(
@@ -21,97 +27,152 @@ app.use(
       "https://heavy-vehicle.netlify.app",
       "http://localhost:5173",
     ],
-    methods: ["GET", "POST", "DELETE", "PUT"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
-// serve images
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// ===================== CREATE UPLOAD FOLDER =====================
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads");
-}
-
-// ===================== MONGO =====================
+// ======================================================
+// MONGODB
+// ======================================================
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.log("❌ Mongo Error:", err));
+  .catch((err) => console.log("❌ MongoDB Error:", err));
 
-// ===================== MULTER =====================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) =>
-    cb(null, Date.now() + path.extname(file.originalname)),
+// ======================================================
+// CLOUDINARY + MULTER
+// ======================================================
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "heavy-vehicles",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    public_id: (req, file) =>
+      `${Date.now()}-${file.originalname.split(".")[0]}`,
+  },
 });
 
 const upload = multer({ storage });
 
-// ===================== MODEL =====================
-const VehicleSchema = new mongoose.Schema({
-  name: String,
-  address: String,
-  vehicleName: String,
-  price: String,
-  district: String,
-  photo: String, // filename only
-  mobilenumber: String,
-  bookings: { type: Number, default: 0 },
+
+
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+module.exports = cloudinary;
+// ======================================================
+// MODEL
+// ======================================================
+const VehicleSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    vehicleName: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: String,
+      required: true,
+    },
+    district: {
+      type: String,
+      required: true,
+    },
+    photo: {
+      type: String, // Cloudinary URL
+      required: true,
+    },
+    mobilenumber: {
+      type: String,
+      required: true,
+    },
+    bookings: {
+      type: Number,
+      default: 0,
+    },
+  },
+  { timestamps: true }
+);
 
 const Vehicle = mongoose.model("Vehicle", VehicleSchema);
 
-// ===================== FORMAT FUNCTION =====================
-const formatVehicle = (v) => ({
-  ...v._doc,
-  photo: v.photo ? `${process.env.BASE_URL}/uploads/${v.photo}` : null,
-});
-
-// ===================== ROOT =====================
+// ======================================================
+// ROOT
+// ======================================================
 app.get("/", (req, res) => {
-  res.send("API is running 🚀");
+  res.send("🚀 Heavy Vehicle Booking API Running with Cloudinary");
 });
 
-// ===================== ADD =====================
+// ======================================================
+// ADD VEHICLE
+// ======================================================
 app.post("/add", upload.single("photo"), async (req, res) => {
   try {
-    const { name, address, vehicleName, price, district, mobilenumber } =
-      req.body;
-
-    const newVehicle = new Vehicle({
+    const {
       name,
       address,
       vehicleName,
       price,
       district,
       mobilenumber,
-      photo: req.file ? req.file.filename : null,
+    } = req.body;
+
+    const vehicle = new Vehicle({
+      name,
+      address,
+      vehicleName,
+      price,
+      district,
+      mobilenumber,
+      photo: req.file ? req.file.path : null,
     });
 
-    await newVehicle.save();
+    await vehicle.save();
 
     res.status(201).json({
-      message: "Vehicle saved successfully",
-      data: newVehicle,
+      success: true,
+      message: "Vehicle added successfully",
+      data: vehicle,
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error("Add Error:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
-// ===================== GET ALL =====================
+// ======================================================
+// GET ALL VEHICLES
+// ======================================================
 app.get("/vehicles", async (req, res) => {
   try {
-    const data = await Vehicle.find();
-    res.json(data.map(formatVehicle));
-  } catch (err) {
-    res.status(500).json({ error: "Fetch error" });
+    const vehicles = await Vehicle.find().sort({ createdAt: -1 });
+    res.json(vehicles);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
-// ===================== SEARCH =====================
+// ======================================================
+// SEARCH VEHICLES
+// ======================================================
 app.get("/search", async (req, res) => {
   try {
     const { vehicleName, district } = req.query;
@@ -119,56 +180,103 @@ app.get("/search", async (req, res) => {
     const query = {};
 
     if (vehicleName) {
-      query.vehicleName = { $regex: vehicleName, $options: "i" };
+      query.vehicleName = {
+        $regex: vehicleName,
+        $options: "i",
+      };
     }
 
     if (district) {
-      query.district = { $regex: district, $options: "i" };
+      query.district = {
+        $regex: district,
+        $options: "i",
+      };
     }
 
-    const data = await Vehicle.find(query);
+    const vehicles = await Vehicle.find(query).sort({
+      createdAt: -1,
+    });
 
-    res.json(data.map(formatVehicle));
-  } catch (err) {
-    res.status(500).json({ error: "Search failed" });
+    res.json(vehicles);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
-// ===================== GET ONE =====================
+// ======================================================
+// GET SINGLE VEHICLE
+// ======================================================
 app.get("/vehicles/:id", async (req, res) => {
   try {
-    const v = await Vehicle.findById(req.params.id);
-    if (!v) return res.status(404).json({ message: "Not found" });
+    const vehicle = await Vehicle.findById(req.params.id);
 
-    res.json(formatVehicle(v));
-  } catch (err) {
-    res.status(500).json({ error: "Error fetching vehicle" });
+    if (!vehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
+    }
+
+    res.json(vehicle);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
-// ===================== DELETE =====================
+// ======================================================
+// DELETE VEHICLE
+// ======================================================
 app.delete("/vehicles/:id", async (req, res) => {
   try {
-    const d = await Vehicle.findByIdAndDelete(req.params.id);
-    if (!d) return res.status(404).json({ message: "Not found" });
+    const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
 
-    res.json({ message: "Deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ error: "Delete error" });
+    if (!vehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Vehicle deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
-// ===================== BOOK =====================
+// ======================================================
+// BOOK VEHICLE
+// ======================================================
 app.post("/book", async (req, res) => {
   try {
     const { vehicleId, userName, userMobile } = req.body;
 
     const vehicle = await Vehicle.findById(vehicleId);
+
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehicle not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
     }
 
-    const message = `Hello, booking:\n\nCustomer: ${userName}\nMobile: ${userMobile}\nVehicle: ${vehicle.vehicleName}`;
+    const message = `Hello, booking request:
+
+Customer Name: ${userName}
+Mobile: ${userMobile}
+Vehicle: ${vehicle.vehicleName}
+Location: ${vehicle.district}`;
 
     const whatsappURL = `https://wa.me/91${vehicle.mobilenumber}?text=${encodeURIComponent(
       message
@@ -179,15 +287,21 @@ app.post("/book", async (req, res) => {
     });
 
     res.json({
+      success: true,
       message: "Booking successful",
       whatsappURL,
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
-// ===================== START =====================
+// ======================================================
+// START SERVER
+// ======================================================
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

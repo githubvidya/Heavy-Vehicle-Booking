@@ -3,8 +3,8 @@ import { useState,useEffect } from "react";
 import "../users_dashboard/Search.css";
 import PageLoader from "../users_dashboard/PageLoader";
 
-const API_BASE_URL =
-  "https://heavy-vehicle-booking-production.up.railway.app";
+// const API_BASE_URL =
+//   "https://heavy-vehicle-booking-production.up.railway.app";
 
 
 function SearchDataHere() {
@@ -36,18 +36,18 @@ function SearchDataHere() {
   }
 
   // ✅ FINAL IMAGE FIX (IMPORTANT)
-const fixImage = (img) => {
-  if (!img) return "";
+// const fixImage = (img) => {
+//   if (!img) return "";
 
-  // already full URL
-  if (img.startsWith("http")) return img;
+//   // already full URL
+//   if (img.startsWith("http")) return img;
 
-  // remove ALL duplicates like uploads/uploads/
-  let clean = img.replace(/^\/+/, "");
-  clean = clean.replace(/uploads\//g, ""); // remove repeated uploads
+//   // remove ALL duplicates like uploads/uploads/
+//   let clean = img.replace(/^\/+/, "");
+//   clean = clean.replace(/uploads\//g, ""); // remove repeated uploads
 
-  return `${API_BASE_URL}/uploads/${clean}`;
-};
+//   return `${API_BASE_URL}/uploads/${clean}`;
+// };
 
   const openForm = (vehicleId) => {
     setSelectedVehicle(vehicleId);
@@ -112,17 +112,31 @@ const fixImage = (img) => {
       <div className="searchGrid">
         {data.map((item) => (
           <div key={item._id} className="searchCard">
+            {/* console.log(item.photo); */}
 
             {/* ✅ FIXED IMAGE HERE */}
-            {item.photo && (
-              <img
-                src={fixImage(item.photo)}
-                alt="vehicle"
-                className="vehicleImg"
-                onClick={() => setFullImage(fixImage(item.photo))}
-              />
-            )}
-
+<img
+  src={
+    item.photo?.startsWith("http")
+      ? item.photo
+      : `https://${item.photo}`
+  }
+  alt={item.vehicleName || "Vehicle"}
+  className="vehicleImg"
+  onClick={() =>
+    setFullImage(
+      item.photo?.startsWith("http")
+        ? item.photo
+        : `https://${item.photo}`
+    )
+  }
+  onError={(e) => {
+    e.target.onerror = null;
+    e.target.src =
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600";
+  }}
+/>
+{console.log("Photo URL:", item.photo)}
             <div className="cardContent">
               <h3>{item.name}</h3>
               <p><strong>Vehicle:</strong> {item.vehicleName}</p>
