@@ -70,10 +70,8 @@ const Home = () => {
                                             <div className="allditels">
                                                 <div className="profile_ditals">
                                                     <span className='span_p' ><img className='image_in_id' src={user?.picture} alt="img" />{user.nickname}</span>
-
                                                 </div>
                                                 <pre className='pre' >{user?.email}</pre>
-
                                                 <button className='btn_pr' onClick={logout}>Logout</button>
                                             </div>
                                         </>
