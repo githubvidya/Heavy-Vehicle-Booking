@@ -122,7 +122,7 @@ const Home = () => {
                             </div>
                         ) : (
                             <div className="owner_customers">
-                                <p className='login_to_contine' >please Login to contine..</p>
+                                <p className='login_to_contine' >please Login to contine...</p>
                                 <button className='customer_btn btn'>
                                     <FaUser size={15} /> User
                                 </button>
