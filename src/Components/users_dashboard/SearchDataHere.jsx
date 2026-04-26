@@ -1,11 +1,10 @@
 import { useLocation } from "react-router-dom";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../users_dashboard/Search.css";
 import PageLoader from "../users_dashboard/PageLoader";
 
-// const API_BASE_URL =
-//   "https://heavy-vehicle-booking-production.up.railway.app";
-
+const API_BASE_URL =
+  "https://heavy-vehicle-booking-production.up.railway.app";
 
 function SearchDataHere() {
   const location = useLocation();
@@ -20,7 +19,6 @@ function SearchDataHere() {
   const [userName, setUserName] = useState("");
   const [userMobile, setUserMobile] = useState("");
   const [fullImage, setFullImage] = useState(null);
-  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,19 +33,17 @@ function SearchDataHere() {
     return <PageLoader />;
   }
 
-  // ✅ FINAL IMAGE FIX (IMPORTANT)
-// const fixImage = (img) => {
-//   if (!img) return "";
+  const getImageUrl = (photo) => {
+    if (!photo) {
+      return "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600";
+    }
 
-//   // already full URL
-//   if (img.startsWith("http")) return img;
+    if (photo.startsWith("http")) {
+      return photo;
+    }
 
-//   // remove ALL duplicates like uploads/uploads/
-//   let clean = img.replace(/^\/+/, "");
-//   clean = clean.replace(/uploads\//g, ""); // remove repeated uploads
-
-//   return `${API_BASE_URL}/uploads/${clean}`;
-// };
+    return `https://${photo}`;
+  };
 
   const openForm = (vehicleId) => {
     setSelectedVehicle(vehicleId);
@@ -68,7 +64,9 @@ function SearchDataHere() {
     try {
       const res = await fetch(`${API_BASE_URL}/book`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           vehicleId: selectedVehicle,
           userName,
@@ -78,7 +76,9 @@ function SearchDataHere() {
 
       const result = await res.json();
 
-      if (!res.ok) throw new Error(result.message);
+      if (!res.ok) {
+        throw new Error(result.message);
+      }
 
       if (result.whatsappURL) {
         window.open(result.whatsappURL, "_blank");
@@ -89,9 +89,8 @@ function SearchDataHere() {
       setShowForm(false);
       setUserName("");
       setUserMobile("");
-
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("Booking Error:", error);
       alert("Booking failed");
     }
   };
@@ -101,67 +100,70 @@ function SearchDataHere() {
   }
 
   return (
-    
     <div className="searchContainer">
-
       <div className="headindS">
         <h1>Happy Customers</h1>
         <span className="borderLine"></span>
       </div>
 
       <div className="searchGrid">
-        {data.map((item) => (
-          <div key={item._id} className="searchCard">
-            {/* console.log(item.photo); */}
+        {data.map((item) => {
+          const imageUrl = getImageUrl(item.photo);
 
-            {/* ✅ FIXED IMAGE HERE */}
-<img
-  src={
-    item.photo?.startsWith("http")
-      ? item.photo
-      : `https://${item.photo}`
-  }
-  alt={item.vehicleName || "Vehicle"}
-  className="vehicleImg"
-  onClick={() =>
-    setFullImage(
-      item.photo?.startsWith("http")
-        ? item.photo
-        : `https://${item.photo}`
-    )
-  }
-  onError={(e) => {
-    e.target.onerror = null;
-    e.target.src =
-      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600";
-  }}
-/>
-{console.log("Photo URL:", item.photo)}
-            <div className="cardContent">
-              <h3>{item.name}</h3>
-              <p><strong>Vehicle:</strong> {item.vehicleName}</p>
-              <p><strong>District:</strong> {item.district}</p>
-              <p><strong>Address:</strong> {item.address}</p>
-              <p><strong>Price:</strong> {item.price}</p>
-              <p><strong>Mobile:</strong> {item.mobilenumber}</p>
+          return (
+            <div key={item._id} className="searchCard">
+              <img
+                src={imageUrl}
+                alt={item.vehicleName || "Vehicle"}
+                className="vehicleImg"
+                onClick={() => setFullImage(imageUrl)}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src =
+                    "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600";
+                }}
+              />
 
-              <button onClick={() => openForm(item._id)}>
-                Book Now
-              </button>
+              <div className="cardContent">
+                <h3>{item.name}</h3>
+                <p>
+                  <strong>Vehicle:</strong> {item.vehicleName}
+                </p>
+                <p>
+                  <strong>District:</strong> {item.district}
+                </p>
+                <p>
+                  <strong>Address:</strong> {item.address}
+                </p>
+                <p>
+                  <strong>Price:</strong> ₹{item.price}
+                </p>
+                <p>
+                  <strong>Mobile:</strong> {item.mobilenumber}
+                </p>
+
+                <button onClick={() => openForm(item._id)}>
+                  Book Now
+                </button>
+              </div>
             </div>
-
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* FULL IMAGE */}
       {fullImage && (
-        <div className="modalOverlay" onClick={() => setFullImage(null)}>
-          <img src={fullImage} className="fullImageView" alt="full" />
+        <div
+          className="modalOverlay"
+          onClick={() => setFullImage(null)}
+        >
+          <img
+            src={fullImage}
+            className="fullImageView"
+            alt="Vehicle"
+          />
         </div>
       )}
 
-      {/* BOOKING FORM */}
       {showForm && (
         <div className="modalOverlay">
           <div className="modalBox">
@@ -178,17 +180,26 @@ function SearchDataHere() {
               type="tel"
               placeholder="Enter mobile number"
               value={userMobile}
-              onChange={(e) => setUserMobile(e.target.value)}
+              maxLength="10"
+              onChange={(e) =>
+                setUserMobile(
+                  e.target.value.replace(/\D/g, "")
+                )
+              }
             />
 
             <div className="modalButtons">
-              <button onClick={handleBooking}>Confirm Booking</button>
-              <button onClick={() => setShowForm(false)}>Cancel</button>
+              <button onClick={handleBooking}>
+                Confirm Booking
+              </button>
+
+              <button onClick={() => setShowForm(false)}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

@@ -3,8 +3,7 @@ import axios from "axios";
 import LoadingPage from "../Vehicle_dashboard/LodingPage";
 import "./Vehicle.css";
 
-const API_BASE =
-  "https://heavy-vehicle-booking-production.up.railway.app";
+const API_BASE = "https://heavy-vehicle-booking-production.up.railway.app";
 
 const VehicleD = () => {
   const districts = [
@@ -34,30 +33,40 @@ const VehicleD = () => {
     "Excavator"
   ];
 
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-
-  const [form, setForm] = useState({
+  const initialForm = {
     name: "",
     address: "",
     vehicleName: "",
     price: "",
     district: "",
     mobilenumber: ""
-  });
+  };
 
+  const [form, setForm] = useState(initialForm);
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+
+    if (name === "mobilenumber") {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value.replace(/\D/g, "").slice(0, 10)
+      }));
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files?.[0];
+    const selectedFile = e.target.files[0];
 
     if (!selectedFile) return;
 
@@ -68,15 +77,8 @@ const VehicleD = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setSuccessMessage("");
-
-    if (!form.name || !form.vehicleName) {
-      alert("Name and Vehicle Name are required");
-      return;
-    }
-
-    if (!form.mobilenumber || form.mobilenumber.length !== 10) {
-      alert("Enter valid 10-digit mobile number");
+    if (!file) {
+      alert("Please select an image.");
       return;
     }
 
@@ -85,42 +87,38 @@ const VehicleD = () => {
     try {
       const formData = new FormData();
 
-      Object.entries(form).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
+      formData.append("name", form.name);
+      formData.append("address", form.address);
+      formData.append("vehicleName", form.vehicleName);
+      formData.append("price", form.price);
+      formData.append("district", form.district);
+      formData.append("mobilenumber", form.mobilenumber);
 
-      if (file) {
-        formData.append("photo", file);
-      }
+      // Must match: upload.single("photo")
+      formData.append("photo", file);
 
-      const res = await axios.post(
+      const response = await axios.post(
         `${API_BASE}/add`,
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
-          },
+            "Content-Type": "multipart/form-data"
+          }
         }
       );
 
-      console.log(res.data);
+      setSuccessMessage(response.data.message || "Vehicle uploaded successfully!");
+      alert("Vehicle uploaded successfully!");
 
-      setSuccessMessage("✅ Vehicle Added Successfully!");
-
-      setForm({
-        name: "",
-        address: "",
-        vehicleName: "",
-        price: "",
-        district: "",
-        mobilenumber: ""
-      });
-
+      setForm(initialForm);
       setFile(null);
-      setPreview(null);
-    } catch (err) {
-      console.error("Upload error:", err);
-      alert("❌ Error saving data");
+      setPreview("");
+    } catch (error) {
+      console.error("Upload Error:", error);
+      alert(
+        error.response?.data?.message ||
+        "Upload failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -134,12 +132,14 @@ const VehicleD = () => {
     <div className="ownerContainer">
       <div className="welcomeBox">
         <h1>Welcome Owner 🚚</h1>
-        <p>
-          List your vehicles and start receiving bookings instantly.
-        </p>
+        <p>List your vehicle and start receiving bookings instantly.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="formCard">
+      <form
+        className="formCard"
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+      >
         <h2>Add Your Vehicle</h2>
 
         <input
@@ -157,6 +157,7 @@ const VehicleD = () => {
           placeholder="Address"
           value={form.address}
           onChange={handleChange}
+          required
         />
 
         <select
@@ -166,8 +167,8 @@ const VehicleD = () => {
           required
         >
           <option value="">Select Vehicle</option>
-          {heavyVehicles.map((vehicle, index) => (
-            <option key={index} value={vehicle}>
+          {heavyVehicles.map((vehicle) => (
+            <option key={vehicle} value={vehicle}>
               {vehicle}
             </option>
           ))}
@@ -179,6 +180,8 @@ const VehicleD = () => {
           placeholder="Price"
           value={form.price}
           onChange={handleChange}
+          min="0"
+          required
         />
 
         <input
@@ -187,7 +190,7 @@ const VehicleD = () => {
           placeholder="Mobile Number"
           value={form.mobilenumber}
           onChange={handleChange}
-          maxLength={10}
+          maxLength="10"
           required
         />
 
@@ -195,40 +198,43 @@ const VehicleD = () => {
           name="district"
           value={form.district}
           onChange={handleChange}
+          required
         >
           <option value="">Select District</option>
-          {districts.map((district, index) => (
-            <option key={index} value={district}>
+          {districts.map((district) => (
+            <option key={district} value={district}>
               {district}
             </option>
           ))}
         </select>
 
-       <input
-  type="file"
-  accept="image/*"
-  onChange={handleFileChange}
-/>
+        <input
+          type="file"
+          name="photo"
+          accept="image/*"
+          onChange={handleFileChange}
+          required
+        />
 
-{preview && (
-  <img
-    src={preview}
-    alt="Vehicle Preview"
-    className="vehicleImg"
-  />
-)}
+        {preview && (
+          <img
+            src={preview}
+            alt="Preview"
+            className="vehicleImg"
+          />
+        )}
 
         <button type="submit">
-          Submit
+          Upload Vehicle
         </button>
       </form>
-          {successMessage && (
-          <p className="successMessage">
-            {successMessage}
-          </p>
-        )}
+
+      {successMessage && (
+        <p className="successMessage">
+          {successMessage}
+        </p>
+      )}
     </div>
-    
   );
 };
 
