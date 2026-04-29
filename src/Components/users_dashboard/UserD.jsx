@@ -4,28 +4,90 @@ import Navbar from "../Navbar/Navbar";
 import "../users_dashboard/User.css";
 import jcb from "../photo/image.png";
 import { useNavigate } from "react-router-dom";
+
 import Services from "./Services/Services";
 import Earn from "./Earn/Earn";
 import Testimonial from "./Testimonial/Testimonial";
 import AboutHighlights from "./AboutHighlights/AboutHighlights";
 
+import "../users_dashboard/User.css";
+
 const districts = [
-  "Agra","Aligarh","Ambedkar Nagar","Amethi","Amroha",
-  "Auraiya","Ayodhya","Azamgarh","Baghpat","Bahraich",
-  "Ballia","Balrampur","Banda","Barabanki","Bareilly",
-  "Basti","Bhadohi","Bijnor","Budaun","Bulandshahr",
-  "Chandauli","Chitrakoot","Deoria","Etah","Etawah",
-  "Farrukhabad","Fatehpur","Firozabad","Gautam Buddha Nagar",
-  "Ghaziabad","Ghazipur","Gonda","Gorakhpur","Hamirpur",
-  "Hapur","Hardoi","Hathras","Jalaun","Jaunpur","Jhansi",
-  "Kannauj","Kanpur Dehat","Kanpur Nagar","Kasganj",
-  "Kaushambi","Kushinagar","Lakhimpur Kheri","Lalitpur",
-  "Lucknow","Maharajganj","Mahoba","Mainpuri","Mathura",
-  "Mau","Meerut","Mirzapur","Moradabad","Muzaffarnagar",
-  "Pilibhit","Pratapgarh","Prayagraj","Raebareli","Rampur",
-  "Saharanpur","Sambhal","Sant Kabir Nagar","Shahjahanpur",
-  "Shamli","Shravasti","Siddharthnagar","Sitapur",
-  "Sonbhadra","Sultanpur","Unnao","Varanasi"
+  "Agra",
+  "Aligarh",
+  "Ambedkar Nagar",
+  "Amethi",
+  "Amroha",
+  "Auraiya",
+  "Ayodhya",
+  "Azamgarh",
+  "Baghpat",
+  "Bahraich",
+  "Ballia",
+  "Balrampur",
+  "Banda",
+  "Barabanki",
+  "Bareilly",
+  "Basti",
+  "Bhadohi",
+  "Bijnor",
+  "Budaun",
+  "Bulandshahr",
+  "Chandauli",
+  "Chitrakoot",
+  "Deoria",
+  "Etah",
+  "Etawah",
+  "Farrukhabad",
+  "Fatehpur",
+  "Firozabad",
+  "Gautam Buddha Nagar",
+  "Ghaziabad",
+  "Ghazipur",
+  "Gonda",
+  "Gorakhpur",
+  "Hamirpur",
+  "Hapur",
+  "Hardoi",
+  "Hathras",
+  "Jalaun",
+  "Jaunpur",
+  "Jhansi",
+  "Kannauj",
+  "Kanpur Dehat",
+  "Kanpur Nagar",
+  "Kasganj",
+  "Kaushambi",
+  "Kushinagar",
+  "Lakhimpur Kheri",
+  "Lalitpur",
+  "Lucknow",
+  "Maharajganj",
+  "Mahoba",
+  "Mainpuri",
+  "Mathura",
+  "Mau",
+  "Meerut",
+  "Mirzapur",
+  "Moradabad",
+  "Muzaffarnagar",
+  "Pilibhit",
+  "Pratapgarh",
+  "Prayagraj",
+  "Raebareli",
+  "Rampur",
+  "Saharanpur",
+  "Sambhal",
+  "Sant Kabir Nagar",
+  "Shahjahanpur",
+  "Shamli",
+  "Shravasti",
+  "Siddharthnagar",
+  "Sitapur",
+  "Sonbhadra",
+  "Sultanpur",
+  "Unnao",
+  "Varanasi",
 ];
 
 const heavyVehicles = [
@@ -33,44 +95,59 @@ const heavyVehicles = [
   "Cement Mixer","Bulldozer","Crane","Excavator"
 ];
 
-// 🔥 IMPORTANT: single base URL (clean + safe)
 const API_BASE_URL =
-  "https://heavy-vehicle-booking-production.up.railway.app";
+  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 function UserD() {
   const [district, setDistrict] = useState("");
   const [vehicle, setVehicle] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
     try {
-      if (!district || !vehicle) {
-        alert("Please select both fields");
+      if (!district.trim() || !vehicle.trim()) {
+        alert("Please select both district and vehicle.");
         return;
       }
 
-      const res = await axios.get(
+      setLoading(true);
+
+      const response = await axios.get(
         `${API_BASE_URL}/search`,
         {
           params: {
+            district,
             vehicleName: vehicle,
-            district: district,
           },
         }
       );
 
-      if (!res.data) {
-        throw new Error("No data received");
+      const vehicles = response.data.data || [];
+
+      if (vehicles.length === 0) {
+        alert("No vehicles found.");
+        return;
       }
 
-      // save for refresh safety
-      localStorage.setItem("searchData", JSON.stringify(res.data));
+      localStorage.setItem(
+        "searchData",
+        JSON.stringify(vehicles)
+      );
 
-      navigate("/searchdata", { state: res.data });
+      navigate("/searchdata", {
+        state: vehicles,
+      });
+    } catch (error) {
+      console.error("Search Error:", error);
 
-    } catch (err) {
-      console.error("Search error:", err);
-      alert("Error fetching data. Please try again.");
+      alert(
+        error.response?.data?.message ||
+        "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,9 +162,13 @@ function UserD() {
           <div className="Search">
             <div className="headingSearch">
               <div className="all">
-                <span className="No1">India’s #1</span><br />
-                <span className="App">Heavy Vehicle App</span><br />
-                <span className="Booking">Find Vehicles in Your District</span>
+                <span className="No1">India's #1</span>
+                <br />
+                <span className="App">Heavy Vehicle App</span>
+                <br />
+                <span className="Booking">
+                  Find Vehicles in Your District
+                </span>
               </div>
 
               <div className="input">
@@ -95,30 +176,52 @@ function UserD() {
                 <select
                   className="select"
                   value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
+                  onChange={(e) =>
+                    setDistrict(e.target.value)
+                  }
                 >
-                  <option value="">-- Select District --</option>
-                  {districts.map((d, i) => (
-                    <option key={i} value={d}>{d}</option>
+                  <option value="">
+                    -- Select District --
+                  </option>
+                  {districts.map((districtName) => (
+                    <option
+                      key={districtName}
+                      value={districtName}
+                    >
+                      {districtName}
+                    </option>
                   ))}
                 </select>
 
                 <select
                   className="select"
                   value={vehicle}
-                  onChange={(e) => setVehicle(e.target.value)}
+                  onChange={(e) =>
+                    setVehicle(e.target.value)
+                  }
                 >
-                  <option value="">-- Select Vehicle --</option>
-                  {heavyVehicles.map((v, i) => (
-                    <option key={i} value={v}>{v}</option>
+                  <option value="">
+                    -- Select Vehicle --
+                  </option>
+                  {heavyVehicles.map((vehicleName) => (
+                    <option
+                      key={vehicleName}
+                      value={vehicleName}
+                    >
+                      {vehicleName}
+                    </option>
                   ))}
                 </select>
 
                 <button
+                  type="button"
                   onClick={handleSubmit}
                   className="subbmitDistrict"
+                  disabled={loading}
                 >
-                  Search Vehicle
+                  {loading
+                    ? "Searching..."
+                    : "Search Vehicle"}
                 </button>
 
               </div>
@@ -128,7 +231,11 @@ function UserD() {
 
         <div className="rightContent">
           <div className="imageJCB">
-            <img src={jcb} alt="JCB" />
+            <img
+              src={jcb}
+              alt="Heavy construction vehicle"
+              loading="lazy"
+            />
           </div>
         </div>
       </div>
@@ -142,7 +249,7 @@ function UserD() {
       </div>
 
       <div className="testimoniall">
-        <div className="headindS">
+        <div className="headingS">
           <h1>Happy Customers</h1>
           <span className="borderLine"></span>
         </div>
@@ -150,7 +257,7 @@ function UserD() {
       </div>
 
       <div className="whyChooseUS">
-        <div className="boxInChoose headindS">
+        <div className="boxInChoose headingS">
           <h1>Why Choose Us</h1>
           <span className="borderLine"></span>
         </div>

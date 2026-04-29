@@ -34,7 +34,7 @@ function App() {
 
         {/* Dashboards */}
         <Route path="/" element={<NavbarOutlet />}>
-          <Route path="userD" element={<UserD />} />
+          <Route path="/userD" element={<UserD />} />
           <Route path="/searchdata" element={<SearchDataHere />} />
           <Route />
         </Route>

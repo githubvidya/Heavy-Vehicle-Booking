@@ -4,7 +4,7 @@ import "../users_dashboard/Search.css";
 import PageLoader from "../users_dashboard/PageLoader";
 
 const API_BASE_URL =
-  "https://heavy-vehicle-booking-production.up.railway.app";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 function SearchDataHere() {
   const location = useLocation();
@@ -20,188 +20,223 @@ function SearchDataHere() {
   const [userMobile, setUserMobile] = useState("");
   const [fullImage, setFullImage] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
+ useEffect(() => {
+  const timer = setTimeout(() => {
+    setLoading(false);
+  }, 2000);
 
-    return () => clearTimeout(timer);
-  }, []);
+  return () => clearTimeout(timer);
+}, []);
 
-  if (loading) {
-    return <PageLoader />;
+const getImageUrl = (photo) => {
+  if (!photo || typeof photo !== "string") {
+    return "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600";
   }
 
-  const getImageUrl = (photo) => {
-    if (!photo) {
-      return "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600";
-    }
+  return photo.startsWith("http")
+    ? photo
+    : `https://${photo}`;
+};
 
-    if (photo.startsWith("http")) {
-      return photo;
-    }
+const openForm = (vehicle) => {
+  setSelectedVehicle(vehicle);
+  setShowForm(true);
+};
 
-    return `https://${photo}`;
-  };
+const closeForm = () => {
+  setShowForm(false);
+  setSelectedVehicle(null);
+  setUserName("");
+  setUserMobile("");
+};
 
-  const openForm = (vehicleId) => {
-    setSelectedVehicle(vehicleId);
-    setShowForm(true);
-  };
-
-  const handleBooking = async () => {
-    if (!userName || !userMobile) {
-      alert("Please enter name and mobile number");
-      return;
-    }
-
-    if (userMobile.length !== 10) {
-      alert("Enter valid 10-digit mobile number");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/book`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          vehicleId: selectedVehicle,
-          userName,
-          userMobile,
-        }),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.message);
-      }
-
-      if (result.whatsappURL) {
-        window.open(result.whatsappURL, "_blank");
-      }
-
-      alert(result.message);
-
-      setShowForm(false);
-      setUserName("");
-      setUserMobile("");
-    } catch (error) {
-      console.error("Booking Error:", error);
-      alert("Booking failed");
-    }
-  };
-
-  if (!Array.isArray(data) || data.length === 0) {
-    return <h2 className="noResult">No results found</h2>;
+const handleBooking = async () => {
+  if (!userName.trim() || !userMobile.trim()) {
+    alert("Please enter your name and mobile number");
+    return;
   }
 
+  if (!/^\d{10}$/.test(userMobile)) {
+    alert("Please enter a valid 10-digit mobile number");
+    return;
+  }
+
+  try {
+    setBookingLoading(true);
+
+    const response = await fetch(`${API_BASE_URL}/api/book`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        vehicleId: selectedVehicle?._id,
+        userName: userName.trim(),
+        userMobile: userMobile.trim(),
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Booking failed");
+    }
+
+    alert(result.message);
+
+    if (result.whatsappURL) {
+      window.open(result.whatsappURL, "_blank");
+    }
+
+    closeForm();
+  } catch (error) {
+    console.error("Booking Error:", error);
+    alert(error.message || "Booking failed");
+  } finally {
+    setBookingLoading(false);
+  }
+};
+
+if (loading) {
+  return <PageLoader />;
+}
+
+if (!Array.isArray(data) || data.length === 0) {
   return (
-    <div className="searchContainer">
-      <div className="headindS">
-        <h1>Happy Customers</h1>
-        <span className="borderLine"></span>
-      </div>
-
-      <div className="searchGrid">
-        {data.map((item) => {
-          const imageUrl = getImageUrl(item.photo);
-
-          return (
-            <div key={item._id} className="searchCard">
-              <img
-                src={imageUrl}
-                alt={item.vehicleName || "Vehicle"}
-                className="vehicleImg"
-                onClick={() => setFullImage(imageUrl)}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src =
-                    "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600";
-                }}
-              />
-
-              <div className="cardContent">
-                <h3>{item.name}</h3>
-                <p>
-                  <strong>Vehicle:</strong> {item.vehicleName}
-                </p>
-                <p>
-                  <strong>District:</strong> {item.district}
-                </p>
-                <p>
-                  <strong>Address:</strong> {item.address}
-                </p>
-                <p>
-                  <strong>Price:</strong> ₹{item.price}
-                </p>
-                <p>
-                  <strong>Mobile:</strong> {item.mobilenumber}
-                </p>
-
-                <button onClick={() => openForm(item._id)}>
-                  Book Now
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {fullImage && (
-        <div
-          className="modalOverlay"
-          onClick={() => setFullImage(null)}
-        >
-          <img
-            src={fullImage}
-            className="fullImageView"
-            alt="Vehicle"
-          />
-        </div>
-      )}
-
-      {showForm && (
-        <div className="modalOverlay">
-          <div className="modalBox">
-            <h2>Book Vehicle</h2>
-
-            <input
-              type="text"
-              placeholder="Enter your name"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-            />
-
-            <input
-              type="tel"
-              placeholder="Enter mobile number"
-              value={userMobile}
-              maxLength="10"
-              onChange={(e) =>
-                setUserMobile(
-                  e.target.value.replace(/\D/g, "")
-                )
-              }
-            />
-
-            <div className="modalButtons">
-              <button onClick={handleBooking}>
-                Confirm Booking
-              </button>
-
-              <button onClick={() => setShowForm(false)}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="noResult">
+      <h2>No vehicles found</h2>
     </div>
   );
+}
+
+return (
+  <div className="searchContainer">
+    <div className="headingS">
+      <h1>Available Vehicles</h1>
+      <span className="borderLine"></span>
+    </div>
+
+    <div className="searchGrid">
+      {data.map((item) => (
+        <div key={item._id} className="searchCard">
+          <img
+            src={getImageUrl(item.photo)}
+            alt={item.vehicleName || "Vehicle"}
+            className="vehicleImg"
+            loading="lazy"
+            onClick={() => {
+              setFullImage(getImageUrl(item.photo));
+              setSelectedVehicle(item);
+            }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src =
+                "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600";
+            }}
+          />
+
+          <div className="cardContent">
+            <h3>{item.name}</h3>
+
+            <p>
+              <strong>Vehicle:</strong> {item.vehicleName}
+            </p>
+
+            <p>
+              <strong>District:</strong> {item.district}
+            </p>
+
+            <p>
+              <strong>Address:</strong> {item.address}
+            </p>
+
+            <p>
+              <strong>Price:</strong> ₹{item.price}
+            </p>
+
+            <p>
+              <strong>Owner Mobile:</strong> {item.mobilenumber}
+            </p>
+
+            <button onClick={() => openForm(item)}>
+              Book Now
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {fullImage && (
+      <div
+        className="modalOverlay"
+        onClick={() => setFullImage(null)}
+      >
+        <img
+          src={fullImage}
+          alt={selectedVehicle?.vehicleName || "Vehicle Image"}
+          className="fullImageView"
+          onClick={(e) => e.stopPropagation()}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src =
+              "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600";
+          }}
+        />
+      </div>
+    )}
+
+    {showForm && selectedVehicle && (
+      <div className="modalOverlay">
+        <div className="modalBox">
+          <h2>Book Vehicle</h2>
+
+          <p className="selectedVehicleName">
+            {selectedVehicle.vehicleName}
+          </p>
+
+          <input
+            type="text"
+            placeholder="Enter Your Name"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+          />
+
+          <input
+            type="tel"
+            placeholder="Enter Mobile Number"
+            value={userMobile}
+            maxLength={10}
+            onChange={(e) =>
+              setUserMobile(
+                e.target.value.replace(/\D/g, "")
+              )
+            }
+          />
+
+          <div className="modalButtons">
+            <button
+              onClick={handleBooking}
+              disabled={bookingLoading}
+            >
+              {bookingLoading
+                ? "Booking..."
+                : "Confirm Booking"}
+            </button>
+
+            <button
+              onClick={closeForm}
+              disabled={bookingLoading}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+);
 }
 
 export default SearchDataHere;
