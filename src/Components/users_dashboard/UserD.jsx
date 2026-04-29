@@ -95,8 +95,9 @@ const heavyVehicles = [
   "Cement Mixer","Bulldozer","Crane","Excavator"
 ];
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:8080/api"
+  : "https://heavy-vehicle-booking-production.up.railway.app/api";
 
 function UserD() {
   const [district, setDistrict] = useState("");

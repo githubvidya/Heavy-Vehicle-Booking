@@ -3,8 +3,9 @@ import axios from "axios";
 import LoadingPage from "../Vehicle_dashboard/LodingPage";
 import "./Vehicle.css";
 
-const API_BASE =
-  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const API_BASE = import.meta.env.DEV
+  ? "http://localhost:8080/api"
+  : "https://heavy-vehicle-booking-production.up.railway.app/api";
 
 const VehicleD = () => {
   const districts = [

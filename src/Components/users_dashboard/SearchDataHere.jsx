@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import "../users_dashboard/Search.css";
 import PageLoader from "../users_dashboard/PageLoader";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:8080"
+  : "https://heavy-vehicle-booking-production.up.railway.app";
 
 function SearchDataHere() {
   const location = useLocation();
