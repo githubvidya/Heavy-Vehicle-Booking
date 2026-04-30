@@ -91,8 +91,8 @@ const districts = [
 ];
 
 const heavyVehicles = [
-  "Truck","Bus","Trailer","Dump Truck",
-  "Cement Mixer","Bulldozer","Crane","Excavator"
+  "Truck", "Bus", "Trailer", "Dump Truck",
+  "Cement Mixer", "Bulldozer", "Crane", "Excavator"
 ];
 
 const API_BASE_URL = import.meta.env.DEV
