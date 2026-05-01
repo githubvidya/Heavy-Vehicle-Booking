@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import '../Home/Home.css';
 import { useAuth0 } from "@auth0/auth0-react";
-import img from '../photo/logo.png'
 import { FaUser } from "react-icons/fa";
 import { FaCar } from "react-icons/fa";
 import { HiArrowLeftStartOnRectangle } from "react-icons/hi2";
@@ -96,7 +95,6 @@ const Home = () => {
                     </nav>
 
                     <div className="logo_main">
-                        <img src={img} alt="logo" className='logo' />
                         <h5 className='logo_name'>Vehicle</h5>
                     </div>
 
@@ -114,7 +112,7 @@ const Home = () => {
 
                                <Link to="VehicleD" >
                                 <button className='btn'>
-                                    <FaCar size={17} color="black" /> Vehicle Owner
+                                    <FaCar size={17} color="#1e293b" /> Vehicle Owner
                                 </button>
                                </Link>
                             </div>
@@ -126,7 +124,7 @@ const Home = () => {
                                 </button>
 
                                 <button className='btn'>
-                                    <FaCar size={17} color="black" /> Vehicle Owner
+                                    <FaCar size={17} color="#1e293b" /> Vehicle Owner
                                 </button>
                             </div>
                         )
