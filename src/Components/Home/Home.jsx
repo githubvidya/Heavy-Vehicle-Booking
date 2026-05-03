@@ -5,7 +5,7 @@ import { FaUser } from "react-icons/fa";
 import { FaCar } from "react-icons/fa";
 import { HiArrowLeftStartOnRectangle } from "react-icons/hi2";
 import Slider from './Slider';
-import {Link} from 'react-router-dom'   
+import { Link } from 'react-router-dom'
 const Home = () => {
 
 
@@ -94,45 +94,47 @@ const Home = () => {
 
                     </nav>
 
-                    <div className="logo_main">
-                        <h5 className='logo_name'>Vehicle</h5>
+                    <div className="logo_main_content">
+                        <div className="logo_main">
+                            <h5 className='logo_name'>Vehicle</h5>
+                        </div>
+
+                        <p className='p' >
+                            Our platform connects customers who need heavy construction vehicles with verified vehicle owners. Customers can easily request equipment like Dumper,  JCB, or Crane for their work. Vehicle owners can register their machines, receive job requests, and earn by providing reliable construction and transport services in their nearby areas.
+                        </p>
+
+
+                        {
+                            isAuthenticated ? (
+                                <div className="owner_customers">
+                                    <Link to="userD" ><button className='customer_btn btn'>
+                                        <FaUser size={15} /> User
+                                    </button>
+                                    </Link>
+
+                                    <Link to="VehicleD" >
+                                        <button className='btn'>
+                                            <FaCar size={17} color="#1e293b" /> Vehicle Owner
+                                        </button>
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="owner_customers">
+                                    <p className='login_to_contine' >please Login to contine...</p>
+                                    <button className='customer_btn btn'>
+                                        <FaUser size={15} /> User
+                                    </button>
+
+                                    <button className='btn'>
+                                        <FaCar size={17} color="#1e293b" /> Vehicle Owner
+                                    </button>
+                                </div>
+                            )
+                        }
                     </div>
-
-                    <p className='p' >
-                        Our platform connects customers who need heavy construction vehicles with verified vehicle owners. Customers can easily request equipment like Dumper,  JCB, or Crane for their work. Vehicle owners can register their machines, receive job requests, and earn by providing reliable construction and transport services in their nearby areas.
-                    </p>
-
-                    {
-                        isAuthenticated ? (
-                            <div className="owner_customers">
-                                <Link to="userD" ><button className='customer_btn btn'>
-                                    <FaUser size={15} /> User
-                                </button>
-                                </Link>
-
-                               <Link to="VehicleD" >
-                                <button className='btn'>
-                                    <FaCar size={17} color="#1e293b" /> Vehicle Owner
-                                </button>
-                               </Link>
-                            </div>
-                        ) : (
-                            <div className="owner_customers">
-                                <p className='login_to_contine' >please Login to contine...</p>
-                                <button className='customer_btn btn'>
-                                    <FaUser size={15} /> User
-                                </button>
-
-                                <button className='btn'>
-                                    <FaCar size={17} color="#1e293b" /> Vehicle Owner
-                                </button>
-                            </div>
-                        )
-                    }
-
                 </aside>
                 <div className="sideImage">
-                   <Slider/>
+                    <Slider />
                 </div>
             </div>
         </>

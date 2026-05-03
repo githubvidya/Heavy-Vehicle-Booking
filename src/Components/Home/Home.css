@@ -16,7 +16,7 @@
     position: relative;
     overflow: hidden;
     border-radius: 24px 0 0 24px;
-    box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
 }
 
 .logo_main {
@@ -32,7 +32,7 @@
 .logo {
     width: 140px;
     height: auto;
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
     margin-bottom: 0.5rem;
 }
 
@@ -109,6 +109,15 @@
     margin-bottom: 2.5rem;
     font-weight: 400;
     animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.logo_main_content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    padding: 5rem 3rem 2rem;
 }
 
 .login_to_contine {
@@ -415,6 +424,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -426,6 +436,7 @@
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -436,6 +447,7 @@
     from {
         transform: translateX(100%);
     }
+
     to {
         transform: translateX(0);
     }
@@ -444,23 +456,29 @@
 /* __________________ RESPONSIVE __________________ */
 
 @media (max-width: 1200px) {
+
     .aside_ {
         width: 50%;
+        gap: 20px;
         padding: 5rem 3rem 2rem;
     }
+
     .sideImage {
         width: 50%;
     }
+
     .logo_name {
         font-size: 32px;
     }
 }
 
 @media (max-width: 900px) {
+
+
     .optinal {
         flex-direction: column;
     }
-    
+
     .sideImage {
         width: 100%;
         height: 400px;
@@ -470,9 +488,9 @@
 
     .aside_ {
         width: 100%;
-        height: auto;
-        min-height: calc(100vh - 400px);
-        padding: 3rem 2rem;
+        min-width: 100%;
+        min-height: auto;
+        padding: 4rem 2rem;
     }
 
     .navbar {
@@ -487,15 +505,25 @@
 }
 
 @media (max-width: 480px) {
-    .aside_ {
-        padding: 2rem 1.5rem;
+
+    .logo_main_content {
+
+        top: 5%;
     }
-    
+
+    .aside_ {
+        padding: 2rem 1rem;
+    }
+
+    .aside_ p.p {
+        font-size: clamp(16px, 1.1vw, 18px);
+    }
+
     .sideImage {
         height: 300px;
     }
-    
+
     .owner_customers {
-        padding: 2rem 1.5rem;
+        padding: 30px 5px 30px 3px;
     }
 }
